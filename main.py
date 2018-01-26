@@ -1,6 +1,7 @@
 import tdl
 from game_object import GameObject
 from random import *
+import random
 from rect import Rect
 from tile import *
 import colors
@@ -242,10 +243,24 @@ game_state = 'playing'
 player_action = None
 
 pygame.mixer.init()
-pygame.mixer.music.load("Music/Visager_-_11_-_Eerie_Mausoleum.mp3")
+pygame.mixer.music.load("Music/" + random.choice([
+    "Visager_-_11_-_Eerie_Mausoleum.mp3",
+    "Visager_-_07_-_Ice_Cave.mp3",
+    "Lately_Kind_of_Yeah_-_03_-_DRACULA.mp3",
+    "Komiku_-_40_-_Treasure_finding.mp3"
+    ]))
 pygame.mixer.music.play()
 
 while not tdl.event.is_window_closed():
+
+    if not pygame.mixer.music.get_busy():
+        pygame.mixer.music.load("Music/" + random.choice([
+            "Visager_-_11_-_Eerie_Mausoleum.mp3",
+            "Visager_-_07_-_Ice_Cave.mp3",
+            "Lately_Kind_of_Yeah_-_03_-_DRACULA.mp3",
+            "Komiku_-_40_-_Treasure_finding.mp3"
+        ]))
+        pygame.mixer.music.play()
 
     render_all()
 
