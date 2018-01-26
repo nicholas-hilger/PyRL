@@ -39,28 +39,29 @@ def handle_keys():
     #Movement keys, only if the player isn't paused
     if game_state == 'playing':
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
-            player.move(0, -1)
+            player.move_or_attack(0, -1, objects)
             fov_recompute = True
         elif user_input.key == 'DOWN' or user_input.key == 'KP2' or user_input.keychar == 'j':
-            player.move(0, 1)
+            player.move_or_attack(0, 1, objects)
             fov_recompute = True
         elif user_input.key == 'RIGHT' or user_input.key == 'KP6' or user_input.keychar == 'l':
-            player.move(1, 0)
+            player.move_or_attack(1, 0, objects)
             fov_recompute = True
         elif user_input.key == 'LEFT' or user_input.key == 'KP4' or user_input.keychar == 'h':
-            player.move(-1, 0)
+            player.move_or_attack(-1, 0, objects)
             fov_recompute = True
+        #diagonal movement
         elif user_input.key == 'KP1':
-            player.move(-1, 1)
+            player.move_or_attack(-1, 1, objects)
             fov_recompute = True
         elif user_input.key == 'KP3':
-            player.move(1, 1)
+            player.move_or_attack(1, 1, objects)
             fov_recompute = True
         elif user_input.key == 'KP7':
-            player.move(-1, -1)
+            player.move_or_attack(-1, -1, objects)
             fov_recompute = True
         elif user_input.key == 'KP9':
-            player.move(1, -1)
+            player.move_or_attack(1, -1, objects)
             fov_recompute = True
         else:
             return 'didnt-take-turn'
@@ -141,7 +142,7 @@ def make_map():
                     create_h_tunnel(prev_x, new_x, prev_y)
                     create_v_tunnel(prev_y, new_y, new_x)
                 else:
-                    # first move horizontally, then veritcally
+                    # first move horizontally, then vertically
                     create_v_tunnel(prev_y, new_y, new_x)
                     create_h_tunnel(prev_x, new_x, prev_y)
 
@@ -252,3 +253,8 @@ while not tdl.event.is_window_closed():
     player_action = handle_keys()
     if player_action == 'exit':
         break
+
+    '''if game_state == 'playing' and player_action != 'didnt-take-turn':
+        for obj in objects:
+            if obj != player:
+                print('The ' + obj.name + ' growls.')'''
