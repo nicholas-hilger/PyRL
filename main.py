@@ -4,6 +4,7 @@ from random import *
 from rect import Rect
 from tile import *
 import colors
+import pygame
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -239,6 +240,10 @@ fov_recompute = True
 
 game_state = 'playing'
 player_action = None
+
+pygame.mixer.init()
+pygame.mixer.music.load("Music/Visager_-_11_-_Eerie_Mausoleum.mp3")
+pygame.mixer.music.play()
 
 while not tdl.event.is_window_closed():
 
