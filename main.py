@@ -209,12 +209,12 @@ def place_objects(room):
         if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=10, defense=0, attack=3)
+                monster_component = Fighter(hp=10, defense=0, strength=3)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=14, defense=1, attack=2)
+                monster_component = Fighter(hp=14, defense=1, strength=2)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
@@ -236,7 +236,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=30, defense=2, attack=5)
+fighter_component = Fighter(hp=30, defense=2, strength=5)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
 
@@ -255,8 +255,6 @@ pygame.mixer.music.load("Music/" + random.choice([
     "Visager Ice Cave.mp3"
     ]))
 pygame.mixer.music.play()
-
-timer = 0
 
 
 while not tdl.event.is_window_closed():

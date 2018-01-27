@@ -36,7 +36,7 @@ class GameObject:
                 target = obj
                 break
         if target is not None:
-            print('The ' + target.name + ' taunts you mercilessly.')
+            self.fighter.attack(target)
         else:
             self.move(dx, dy)
 
@@ -77,11 +77,24 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, attack):
+    def __init__(self, hp, defense, strength):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
-        self.attack = attack
+        self.strength = strength
+
+    def take_damage(self, damage):
+        if damage > 0:
+            self.hp -= damage
+
+    def attack(self, target):
+        damage = self.strength - target.fighter.defense
+
+        if damage > 0:
+            print(self.owner.name.capitalize() + ' smacks ' + target.name + ' for ' + str(damage) + ' damage.')
+            target.fighter.take_damage(damage)
+        else:
+            print(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
 
 
 class BasicMonster():
@@ -89,11 +102,9 @@ class BasicMonster():
     def take_turn(self, visible_tiles, player):
         #if you can see it, it can see you
         monster = self.owner
-        self.visible_tiles = visible_tiles
-        self.player = player
         if (monster.x, monster.y) in visible_tiles:
-            if monster.distance_to(self.player) >= 2:
-                monster.move_towards(self.player.x, self.player.y)
+            if monster.distance_to(player) >= 2:
+                monster.move_towards(player.x, player.y)
 
-            elif self.player.fighter.hp > 0:
-                print('The ' + monster.name + '\'s attack whiffs!')
+            elif player.fighter.hp > 0:
+                monster.fighter.attack(player)
