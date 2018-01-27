@@ -1,11 +1,11 @@
 import tdl
-from game_object import GameObject
-from random import *
 import random
+from random import randint
 from rect import Rect
 from tile import *
 import colors
 import pygame
+from game_object import *
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -31,7 +31,6 @@ color_light_ground = (100, 100, 100)
 
 global fov_recompute
 fov_recompute = True
-
 
 def handle_keys():
 
@@ -65,15 +64,14 @@ def handle_keys():
         elif user_input.key == 'KP9':
             player.move_or_attack(1, -1, objects)
             fov_recompute = True
+        elif user_input.key == 'ESCAPE':
+            return 'exit'
         else:
             return 'didnt-take-turn'
 
     '''if user_input.key == 'ENTER' and user_input.alt:
         #Alt-enter toggles fullscreen
         tdl.set_fullscren(not tdl.get_fullscreen())'''
-
-    if user_input.key == 'ESCAPE':
-        return 'exit'
 
 
 def create_room(room):
@@ -201,7 +199,6 @@ def render_all():
     #blit the contents of "con" to the root console and display it
     root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
-
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
 
@@ -209,13 +206,18 @@ def place_objects(room):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if randint(0, 100) < 80 and not GameObject.is_blocked(GameObject, x, y, my_map, objects):
-            #create a goblin
-            monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True)
-        else:
-            #create a slug
-            monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True)
-        objects.append(monster)
+        if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
+            if randint(0, 100) < 80:
+                #create a goblin
+                monster_component = Fighter(hp=10, defense=0, attack=3)
+                ai_component = BasicMonster()
+                monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+            else:
+                #create a slug
+                monster_component = Fighter(hp=14, defense=1, attack=2)
+                ai_component = BasicMonster()
+                monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+            objects.append(monster)
 
 #######################
 #Init and Main Loop   #
@@ -223,16 +225,19 @@ def place_objects(room):
 
 
 tdl.set_font('Fonts/terminal10x10_gs_tc.png', greyscale=True, altLayout=True)
-root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 objects = []
+
+music_play = 1
 
 my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True)
+fighter_component = Fighter(hp=30, defense=2, attack=5)
+player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
 
 make_map()
@@ -244,21 +249,25 @@ player_action = None
 
 pygame.mixer.init()
 pygame.mixer.music.load("Music/" + random.choice([
-    "Visager_-_11_-_Eerie_Mausoleum.mp3",
-    "Visager_-_07_-_Ice_Cave.mp3",
-    "Lately_Kind_of_Yeah_-_03_-_DRACULA.mp3",
-    "Komiku_-_40_-_Treasure_finding.mp3"
+    "Komiku Treasure Finding.mp3",
+    "Lately Kind Of Yeah DRACULA.mp3",
+    "Visager Eerie Mausoleum.mp3",
+    "Visager Ice Cave.mp3"
     ]))
 pygame.mixer.music.play()
 
+timer = 0
+
+
 while not tdl.event.is_window_closed():
 
-    if not pygame.mixer.music.get_busy():
+    while not pygame.mixer.music.get_busy():
+        print('Changing music')
         pygame.mixer.music.load("Music/" + random.choice([
-            "Visager_-_11_-_Eerie_Mausoleum.mp3",
-            "Visager_-_07_-_Ice_Cave.mp3",
-            "Lately_Kind_of_Yeah_-_03_-_DRACULA.mp3",
-            "Komiku_-_40_-_Treasure_finding.mp3"
+            "Komiku Treasure Finding.mp3",
+            "Lately Kind Of Yeah DRACULA.mp3",
+            "Visager Eerie Mausoleum.mp3",
+            "Visager Ice Cave.mp3"
         ]))
         pygame.mixer.music.play()
 
@@ -274,7 +283,7 @@ while not tdl.event.is_window_closed():
     if player_action == 'exit':
         break
 
-    '''if game_state == 'playing' and player_action != 'didnt-take-turn':
+    if game_state == 'playing' and player_action != 'didnt-take-turn':
         for obj in objects:
-            if obj != player:
-                print('The ' + obj.name + ' growls.')'''
+            if obj.ai:
+                obj.ai.take_turn(visible_tiles, player)

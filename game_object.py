@@ -1,3 +1,6 @@
+import math
+
+
 class GameObject:
     #A generic object. Always represented by a character on screen.
     def __init__(self, x, y, char, name, color, my_map, objects, blocks=False, fighter=None, ai=None):
@@ -9,14 +12,14 @@ class GameObject:
         self.blocks = blocks
         self.my_map = my_map
         self.objects = objects
-
         self.fighter = fighter
+
         if self.fighter:
             self.fighter.owner = self
 
         self.ai = ai
         if self.ai:
-            self.owner.ai = self
+            self.ai.owner = self
 
     def move(self, dx, dy):
         if not self.is_blocked(self.x + dx, self.y + dy, self.my_map, self.objects):
@@ -54,6 +57,23 @@ class GameObject:
 
         return False
 
+    def move_towards(self, target_x, target_y):
+        #vector from this object to the target, and distance
+        dx = target_x - self.x
+        dy = target_y - self.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+
+        #normalize it to length 1 (preserving direction) then round it and
+        #convert to int so the movement is restricted to the grid
+        dx = int(round(dx / distance))
+        dy = int(round(dy / distance))
+        self.move(dx, dy)
+
+    def distance_to(self, other):
+        dx = other.x - self.x
+        dy = other.y - self.y
+        return math.sqrt(dx ** 2 + dy ** 2)
+
 
 class Fighter:
     #Combat-related properties and methods
@@ -64,7 +84,16 @@ class Fighter:
         self.attack = attack
 
 
-class BasicMonster:
+class BasicMonster():
     #AI for a basic monster
-    def take_turn(self):
-        print('The ' + self.owner.name + ' taps their foot.')
+    def take_turn(self, visible_tiles, player):
+        #if you can see it, it can see you
+        monster = self.owner
+        self.visible_tiles = visible_tiles
+        self.player = player
+        if (monster.x, monster.y) in visible_tiles:
+            if monster.distance_to(self.player) >= 2:
+                monster.move_towards(self.player.x, self.player.y)
+
+            elif self.player.fighter.hp > 0:
+                print('The ' + monster.name + '\'s attack whiffs!')
