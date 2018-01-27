@@ -70,12 +70,11 @@ def handle_keys():
             fov_recompute = True
         elif user_input.key == 'ESCAPE':
             return 'exit'
+        elif user_input.key == 'ENTER' and user_input.alt:
+            #Alt-enter toggles fullscreen
+            tdl.set_fullscreen(not tdl.get_fullscreen())
         else:
             return 'didnt-take-turn'
-
-    '''if user_input.key == 'ENTER' and user_input.alt:
-        #Alt-enter toggles fullscreen
-        tdl.set_fullscren(not tdl.get_fullscreen())'''
 
 
 def create_room(room):
