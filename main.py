@@ -11,11 +11,15 @@ SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
 
 MAP_WIDTH = 80
-MAP_HEIGHT = 45
+MAP_HEIGHT = 43
 
 ROOM_MAX_SIZE = 12
 ROOM_MIN_SIZE = 7
 MAX_ROOMS = 32
+
+BAR_WIDTH = 20
+PANEL_HEIGHT = 7
+PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 
 FPS = 30
 
@@ -201,7 +205,14 @@ def render_all():
     #blit the contents of "con" to the root console and display it
     root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
-    con.draw_str(1, SCREEN_HEIGHT - 2, 'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
+    #clears the stats panel
+    panel.clear(fg=colors.white, bg=colors.black)
+
+    #show the player's stats
+    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
+
+    #blit the contents of panel to the root console
+    root.blit(panel, 0, PANEL_Y, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0)
 
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
@@ -244,6 +255,19 @@ def monster_death(monster):
     monster.name = monster.name + '\'s remains'
     monster.send_to_back(objects)
 
+
+def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
+    bar_width = int(float(value) / maximum * tot_width)
+
+    panel.draw_rect(x, y, tot_width, 1, None, bg=back_color)
+
+    if bar_width > 0:
+        panel.draw_rect(x, y, bar_width, 1, None, bg=bar_color)
+
+    text = name + ': ' + str(value) + '/' + str(maximum)
+    x_centered = x + (tot_width-len(text))//2
+    panel.draw_str(x, y, text, fg=colors.white, bg=None)
+
 #######################
 #Init and Main Loop   #
 #######################
@@ -252,6 +276,7 @@ def monster_death(monster):
 tdl.set_font('Fonts/terminal10x10_gs_tc.png', greyscale=True, altLayout=True)
 root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
+panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
 objects = []
 
@@ -261,7 +286,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=30, defense=2, strength=5, death_function=player_death)
+fighter_component = Fighter(hp=100, defense=1, strength=5, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
 

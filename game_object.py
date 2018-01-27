@@ -91,6 +91,7 @@ class Fighter:
         if damage > 0:
             self.hp -= damage
         if self.hp <= 0:
+            self.hp = 0
             func = self.death_function
             if func is not None:
                 func(self.owner)
