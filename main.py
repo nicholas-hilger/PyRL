@@ -1,9 +1,11 @@
 import tdl
-from game_object import GameObject
-from random import *
+import random
+from random import randint
 from rect import Rect
 from tile import *
 import colors
+import pygame
+from game_object import *
 
 SCREEN_WIDTH = 80
 SCREEN_HEIGHT = 50
@@ -30,7 +32,6 @@ color_light_ground = (100, 100, 100)
 global fov_recompute
 fov_recompute = True
 
-
 def handle_keys():
 
     user_input = tdl.event.key_wait()
@@ -39,38 +40,38 @@ def handle_keys():
     #Movement keys, only if the player isn't paused
     if game_state == 'playing':
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
-            player.move(0, -1)
+            player.move_or_attack(0, -1, objects)
             fov_recompute = True
         elif user_input.key == 'DOWN' or user_input.key == 'KP2' or user_input.keychar == 'j':
-            player.move(0, 1)
+            player.move_or_attack(0, 1, objects)
             fov_recompute = True
         elif user_input.key == 'RIGHT' or user_input.key == 'KP6' or user_input.keychar == 'l':
-            player.move(1, 0)
+            player.move_or_attack(1, 0, objects)
             fov_recompute = True
         elif user_input.key == 'LEFT' or user_input.key == 'KP4' or user_input.keychar == 'h':
-            player.move(-1, 0)
+            player.move_or_attack(-1, 0, objects)
             fov_recompute = True
+        #diagonal movement
         elif user_input.key == 'KP1':
-            player.move(-1, 1)
+            player.move_or_attack(-1, 1, objects)
             fov_recompute = True
         elif user_input.key == 'KP3':
-            player.move(1, 1)
+            player.move_or_attack(1, 1, objects)
             fov_recompute = True
         elif user_input.key == 'KP7':
-            player.move(-1, -1)
+            player.move_or_attack(-1, -1, objects)
             fov_recompute = True
         elif user_input.key == 'KP9':
-            player.move(1, -1)
+            player.move_or_attack(1, -1, objects)
             fov_recompute = True
+        elif user_input.key == 'ESCAPE':
+            return 'exit'
         else:
             return 'didnt-take-turn'
 
     '''if user_input.key == 'ENTER' and user_input.alt:
         #Alt-enter toggles fullscreen
         tdl.set_fullscren(not tdl.get_fullscreen())'''
-
-    if user_input.key == 'ESCAPE':
-        return 'exit'
 
 
 def create_room(room):
@@ -141,7 +142,7 @@ def make_map():
                     create_h_tunnel(prev_x, new_x, prev_y)
                     create_v_tunnel(prev_y, new_y, new_x)
                 else:
-                    # first move horizontally, then veritcally
+                    # first move horizontally, then vertically
                     create_v_tunnel(prev_y, new_y, new_x)
                     create_h_tunnel(prev_x, new_x, prev_y)
 
@@ -193,11 +194,14 @@ def render_all():
                     con.draw_char(x, y, '.', fg=color_light_ground, bg=None)
 
     for obj in objects:
-        obj.draw(con, visible_tiles)
+        if obj != player:
+            obj.draw(con, visible_tiles)
+    player.draw(con, visible_tiles)
 
     #blit the contents of "con" to the root console and display it
     root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
 
+    con.draw_str(1, SCREEN_HEIGHT - 2, 'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
 
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
@@ -206,13 +210,39 @@ def place_objects(room):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if randint(0, 100) < 80 and not GameObject.is_blocked(GameObject, x, y, my_map, objects):
-            #create a goblin
-            monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True)
-        else:
-            #create a slug
-            monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True)
-        objects.append(monster)
+        if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
+            if randint(0, 100) < 80:
+                #create a goblin
+                monster_component = Fighter(hp=10, defense=0, strength=3, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+            else:
+                #create a slug
+                monster_component = Fighter(hp=14, defense=1, strength=2, death_function=monster_death)
+                ai_component = BasicMonster()
+                monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+            objects.append(monster)
+
+
+def player_death(player):
+    global game_state
+    print('You died!')
+    game_state = 'dead'
+
+    #turn the player into a corpse
+    player.char = '%'
+    player.color = colors.dark_red
+
+
+def monster_death(monster):
+    print(monster.name.capitalize() + ' collapses in a pile of gore.')
+    monster.char = '%'
+    monster.color = colors.crimson
+    monster.blocks = False
+    monster.fighter = None
+    monster.ai = None
+    monster.name = monster.name + '\'s remains'
+    monster.send_to_back(objects)
 
 #######################
 #Init and Main Loop   #
@@ -220,16 +250,19 @@ def place_objects(room):
 
 
 tdl.set_font('Fonts/terminal10x10_gs_tc.png', greyscale=True, altLayout=True)
-root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="Roguelike", fullscreen=False)
+root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 
 objects = []
+
+music_play = 1
 
 my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True)
+fighter_component = Fighter(hp=30, defense=2, strength=5, death_function=player_death)
+player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
 
 make_map()
@@ -239,7 +272,28 @@ fov_recompute = True
 game_state = 'playing'
 player_action = None
 
+pygame.mixer.init()
+pygame.mixer.music.load("Music/" + random.choice([
+    "Komiku Treasure Finding.mp3",
+    "Lately Kind Of Yeah DRACULA.mp3",
+    "Visager Eerie Mausoleum.mp3",
+    "Visager Ice Cave.mp3"
+    ]))
+pygame.mixer.music.play()
+
+render_all()
+
 while not tdl.event.is_window_closed():
+
+    while not pygame.mixer.music.get_busy():
+        print('Changing music')
+        pygame.mixer.music.load("Music/" + random.choice([
+            "Komiku Treasure Finding.mp3",
+            "Lately Kind Of Yeah DRACULA.mp3",
+            "Visager Eerie Mausoleum.mp3",
+            "Visager Ice Cave.mp3"
+        ]))
+        pygame.mixer.music.play()
 
     render_all()
 
@@ -252,3 +306,8 @@ while not tdl.event.is_window_closed():
     player_action = handle_keys()
     if player_action == 'exit':
         break
+
+    if game_state == 'playing' and player_action != 'didnt-take-turn':
+        for obj in objects:
+            if obj.ai:
+                obj.ai.take_turn(visible_tiles, player)
