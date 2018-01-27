@@ -194,10 +194,14 @@ def render_all():
                     con.draw_char(x, y, '.', fg=color_light_ground, bg=None)
 
     for obj in objects:
-        obj.draw(con, visible_tiles)
+        if obj != player:
+            obj.draw(con, visible_tiles)
+    player.draw(con, visible_tiles)
 
     #blit the contents of "con" to the root console and display it
     root.blit(con, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0)
+
+    con.draw_str(1, SCREEN_HEIGHT - 2, 'HP: ' + str(player.fighter.hp) + '/' + str(player.fighter.max_hp))
 
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
@@ -209,15 +213,36 @@ def place_objects(room):
         if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=10, defense=0, strength=3)
+                monster_component = Fighter(hp=10, defense=0, strength=3, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=14, defense=1, strength=2)
+                monster_component = Fighter(hp=14, defense=1, strength=2, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
+
+
+def player_death(player):
+    global game_state
+    print('You died!')
+    game_state = 'dead'
+
+    #turn the player into a corpse
+    player.char = '%'
+    player.color = colors.dark_red
+
+
+def monster_death(monster):
+    print(monster.name.capitalize() + ' collapses in a pile of gore.')
+    monster.char = '%'
+    monster.color = colors.crimson
+    monster.blocks = False
+    monster.fighter = None
+    monster.ai = None
+    monster.name = monster.name + '\'s remains'
+    monster.send_to_back(objects)
 
 #######################
 #Init and Main Loop   #
@@ -236,7 +261,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=30, defense=2, strength=5)
+fighter_component = Fighter(hp=30, defense=2, strength=5, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
 
@@ -256,6 +281,7 @@ pygame.mixer.music.load("Music/" + random.choice([
     ]))
 pygame.mixer.music.play()
 
+render_all()
 
 while not tdl.event.is_window_closed():
 

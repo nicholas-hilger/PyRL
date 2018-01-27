@@ -32,7 +32,7 @@ class GameObject:
 
         target = None
         for obj in objects:
-            if obj.x == x and obj.y == y:
+            if obj.x == x and obj.y == y and obj.fighter:
                 target = obj
                 break
         if target is not None:
@@ -74,18 +74,26 @@ class GameObject:
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
 
+    def send_to_back(self, objects):
+        objects.remove(self)
+        objects.insert(0, self)
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, strength):
+    def __init__(self, hp, defense, strength, death_function=None):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
         self.strength = strength
+        self.death_function = death_function
 
     def take_damage(self, damage):
         if damage > 0:
             self.hp -= damage
+        if self.hp <= 0:
+            func = self.death_function
+            if func is not None:
+                func(self.owner)
 
     def attack(self, target):
         damage = self.strength - target.fighter.defense
