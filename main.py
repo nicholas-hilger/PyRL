@@ -176,11 +176,18 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, strength, xp=0, death_function=None):
+    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, xp=0, death_function=None):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
-        self.strength = strength
+        self.cut = cut
+        self.blunt = blunt
+        self.pierce = pierce
+        self.magic = magic
+        self.cut_res = cut_res
+        self.blunt_res = blunt_res
+        self.pierce_res = pierce_res
+        self.magic_res = magic_res
         self.xp = 0
         self.max_xp = xp
         self.death_function = death_function
@@ -391,12 +398,12 @@ def place_objects(room):
         if not GameObject.is_blocked(GameObject, x, y):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=10, defense=0, strength=3, xp=8, death_function=monster_death)
+                monster_component = Fighter(hp=10, defense=0, cut=3, xp=8, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=14, defense=1, strength=2, xp=6, death_function=monster_death)
+                monster_component = Fighter(hp=14, defense=1, blunt=2, xp=6, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 's', 'Slug', colors.amber, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
@@ -468,7 +475,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=75, defense=1, strength=5, xp=50, death_function=player_death)
+fighter_component = Fighter(hp=75, defense=1, blunt=5, xp=50, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), blocks=True, fighter=fighter_component)
 objects.append(player)
 
