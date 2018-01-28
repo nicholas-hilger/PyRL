@@ -6,20 +6,25 @@ from tile import *
 import colors
 import pygame
 from game_object import *
+import textwrap
 
-SCREEN_WIDTH = 80
-SCREEN_HEIGHT = 50
+SCREEN_WIDTH = 100
+SCREEN_HEIGHT = 80
 
-MAP_WIDTH = 80
-MAP_HEIGHT = 43
+MAP_WIDTH = 100
+MAP_HEIGHT = 72
 
-ROOM_MAX_SIZE = 12
-ROOM_MIN_SIZE = 7
-MAX_ROOMS = 32
+ROOM_MAX_SIZE = 17
+ROOM_MIN_SIZE = 9
+MAX_ROOMS = 38
 
 BAR_WIDTH = 20
-PANEL_HEIGHT = 7
+PANEL_HEIGHT = 8
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
+
+MSG_X = BAR_WIDTH + 2
+MSG_WIDTH = SCREEN_WIDTH - BAR_WIDTH - 2
+MSG_HEIGHT = PANEL_HEIGHT - 1
 
 FPS = 30
 
@@ -70,11 +75,12 @@ def handle_keys():
             fov_recompute = True
         elif user_input.key == 'ESCAPE':
             return 'exit'
-        elif user_input.key == 'ENTER' and user_input.alt:
-            #Alt-enter toggles fullscreen
-            tdl.set_fullscreen(not tdl.get_fullscreen())
         else:
             return 'didnt-take-turn'
+
+        '''elif user_input.key == 'ENTER' and user_input.alt:
+            #Alt-enter toggles fullscreen
+            tdl.set_fullscreen(not tdl.get_fullscreen())'''
 
 
 def create_room(room):
@@ -207,6 +213,11 @@ def render_all():
     #clears the stats panel
     panel.clear(fg=colors.white, bg=colors.black)
 
+    y = 1
+    for(line, color) in game_msgs:
+        panel.draw_str(MSG_X, y, line, bg=None, fg=color)
+        y += 1
+
     #show the player's stats
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
 
@@ -267,6 +278,17 @@ def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
     x_centered = x + (tot_width-len(text))//2
     panel.draw_str(x, y, text, fg=colors.white, bg=None)
 
+def message(new_msg, color = colors.white):
+    #split the message into multiple lines, if need be
+    new_msg_lines = textwrap.wrap(new_msg, MSG_WIDTH)
+
+    for line in new_msg_lines:
+        #if the buffer is full, remove the first line to make room for the new one
+        if len(game_msgs) == MSG_HEIGHT:
+            del game_msgs[0]
+
+        game_msgs.append((line, color))
+
 #######################
 #Init and Main Loop   #
 #######################
@@ -279,6 +301,8 @@ panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
 objects = []
 
+game_msgs = []
+
 music_play = 1
 
 my_map = [[Tile(True)
@@ -288,6 +312,8 @@ my_map = [[Tile(True)
 fighter_component = Fighter(hp=100, defense=1, strength=5, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
 objects.append(player)
+
+message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
 
 make_map()
 
@@ -306,6 +332,8 @@ pygame.mixer.music.load("Music/" + random.choice([
 pygame.mixer.music.play()
 
 render_all()
+
+mouse_coord = (0, 0)
 
 while not tdl.event.is_window_closed():
 
