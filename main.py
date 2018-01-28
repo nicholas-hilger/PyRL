@@ -38,13 +38,26 @@ color_light_wall = (255, 255, 255)
 color_dark_ground = (50, 50, 50)
 color_light_ground = (100, 100, 100)
 
+mouse_coord = (0, 0)
+
 global fov_recompute
 fov_recompute = True
 
 def handle_keys():
 
-    user_input = tdl.event.key_wait()
     global fov_recompute
+    global mouse_coord
+
+    keypress = False
+    for event in tdl.event.get():
+        if event.type == 'KEYDOWN' or event.type == 'KEYCHAR':
+            user_input = event
+            keypress = True
+        if event.type == 'MOUSEMOTION':
+            mouse_coord = event.cell
+
+    if not keypress:
+        return 'didnt-take-turn'
 
     #Movement keys, only if the player isn't paused
     if game_state == 'playing':
@@ -81,6 +94,18 @@ def handle_keys():
         '''elif user_input.key == 'ENTER' and user_input.alt:
             #Alt-enter toggles fullscreen
             tdl.set_fullscreen(not tdl.get_fullscreen())'''
+
+
+def get_names_under_mouse():
+    global visible_tiles
+
+    (x, y) = mouse_coord
+
+    names = [obj.name for obj in objects
+             if obj.x == x and obj.y == y and (obj.x, obj.y) in visible_tiles]
+
+    names = ', '.join(names) #join the names, seperated by commas
+    return names.capitalize()
 
 
 def create_room(room):
@@ -221,8 +246,11 @@ def render_all():
     #show the player's stats
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
 
+    panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
+
     #blit the contents of panel to the root console
     root.blit(panel, 0, PANEL_Y, SCREEN_WIDTH, PANEL_HEIGHT, 0, 0)
+
 
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
@@ -334,6 +362,8 @@ pygame.mixer.music.play()
 render_all()
 
 mouse_coord = (0, 0)
+
+tdl.set_fps(30)
 
 while not tdl.event.is_window_closed():
 
