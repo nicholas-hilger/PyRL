@@ -547,12 +547,14 @@ game_state = 'playing'
 player_action = None
 
 pygame.mixer.init()
-pygame.mixer.music.load("Music/" + random.choice([
-    "Komiku Treasure Finding.mp3",
-    "Lately Kind Of Yeah DRACULA.mp3",
-    "Visager Eerie Mausoleum.mp3",
-    "Visager Ice Cave.mp3"
-    ]))
+mus = ("Music/" + random.choice([
+            "Komiku Treasure Finding.mp3",
+            "Komiku_-_51_-_Chocolate_Valley.mp3",
+            "Komiku_-_52_-_Cave_of_time.mp3",
+            "Visager Ice Cave.mp3"
+        ]))
+print('Now Playing ' + mus)
+pygame.mixer.music.load(mus)
 pygame.mixer.music.play()
 
 render_all()
@@ -564,12 +566,14 @@ tdl.set_fps(30)
 while not tdl.event.is_window_closed():
 
     while not pygame.mixer.music.get_busy():
-        pygame.mixer.music.load("Music/" + random.choice([
+        mus = ("Music/" + random.choice([
             "Komiku Treasure Finding.mp3",
-            "Lately Kind Of Yeah DRACULA.mp3",
-            "Visager Eerie Mausoleum.mp3",
+            "Komiku_-_51_-_Chocolate_Valley.mp3",
+            "Komiku_-_52_-_Cave_of_time.mp3",
             "Visager Ice Cave.mp3"
         ]))
+        print('Now Playing ' + mus)
+        pygame.mixer.music.load(mus)
         pygame.mixer.music.play()
 
     render_all()
