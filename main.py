@@ -40,6 +40,8 @@ color_light_ground = (100, 100, 100)
 
 mouse_coord = (0, 0)
 
+turns = 0
+
 global fov_recompute
 fov_recompute = True
 
@@ -47,6 +49,7 @@ def handle_keys():
 
     global fov_recompute
     global mouse_coord
+    global turns
 
     keypress = False
     for event in tdl.event.get():
@@ -61,6 +64,7 @@ def handle_keys():
 
     #Movement keys, only if the player isn't paused
     if game_state == 'playing':
+        turns += 1
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
             player.move_or_attack(0, -1)
             fov_recompute = True
@@ -176,7 +180,7 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, att=0, wis=0, xp=0, gold=0, death_function=None, lvl=1):
+    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, att=0, wis=0, xp=0, gold=0, spd = 1, death_function=None, lvl=1):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
@@ -195,6 +199,7 @@ class Fighter:
         self.wis = wis
         self.att = att
         self.gold = gold
+        self.spd = spd
 
     def take_damage(self, damage):
         if damage > 0:
@@ -246,6 +251,10 @@ class Fighter:
             self.lvl += 1
             message(player.name + ' is now level ' + str(player.fighter.lvl) + '!', colors.dark_green)
 
+    def check_limits(self):
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
 class BasicMonster():
     #AI for a basic monster
     def take_turn(self, visible_tiles, player):
@@ -255,7 +264,7 @@ class BasicMonster():
             if monster.distance_to(player) >= 2:
                 monster.move_towards(player.x, player.y)
 
-            elif player.fighter.hp > 0:
+            elif player.fighter.hp > 0 and turns % monster.fighter.spd == 0:
                 monster.fighter.attack(player)
 
 
@@ -415,6 +424,7 @@ def render_all():
     panel.draw_str(15, 1, 'Lvl ' + str(player.fighter.lvl), fg=colors.green)
 
     panel.draw_str(1, 4, '$' + str(player.fighter.gold), fg=colors.yellow)
+    panel.draw_str(10, 4, 'T:' + str(turns), fg=colors.white)
 
     panel.draw_str(1, 5, 'C:' + str(player.fighter.cut), fg=colors.red)
     panel.draw_str(7, 5, 'B:' + str(player.fighter.blunt), fg=colors.gray)
@@ -446,12 +456,12 @@ def place_objects(room):
         if not GameObject.is_blocked(GameObject, x, y):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=12, defense=2, cut=3, xp=8, death_function=monster_death)
+                monster_component = Fighter(hp=27, defense=2, cut=4, xp=8, spd=3, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=16, defense=1, blunt=2, xp=6, death_function=monster_death)
+                monster_component = Fighter(hp=19, defense=1, blunt=2, xp=6, spd=2, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 's', 'Slug', colors.amber, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
@@ -554,7 +564,6 @@ tdl.set_fps(30)
 while not tdl.event.is_window_closed():
 
     while not pygame.mixer.music.get_busy():
-        print('Changing music')
         pygame.mixer.music.load("Music/" + random.choice([
             "Komiku Treasure Finding.mp3",
             "Lately Kind Of Yeah DRACULA.mp3",
@@ -576,8 +585,10 @@ while not tdl.event.is_window_closed():
         break
 
     player.fighter.check_xp(player)
+    player.fighter.check_limits()
 
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for obj in objects:
             if obj.ai:
-                obj.ai.take_turn(visible_tiles, player)
+                if turns % obj.fighter.spd == 0:
+                    obj.ai.take_turn(visible_tiles, player)
