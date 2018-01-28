@@ -1,6 +1,5 @@
 import math
 
-
 class GameObject:
     #A generic object. Always represented by a character on screen.
     def __init__(self, x, y, char, name, color, my_map, objects, blocks=False, fighter=None, ai=None):
@@ -100,10 +99,10 @@ class Fighter:
         damage = self.strength - target.fighter.defense
 
         if damage > 0:
-            print(self.owner.name.capitalize() + ' smacks ' + target.name + ' for ' + str(damage) + ' damage.')
+            message(self.owner.name.capitalize() + ' smacks ' + target.name + ' for ' + str(damage) + ' damage.')
             target.fighter.take_damage(damage)
         else:
-            print(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
+            message(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
 
 
 class BasicMonster():
