@@ -176,7 +176,7 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, xp=0, death_function=None):
+    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, att=0, wis=0, xp=0, death_function=None, lvl=1):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
@@ -191,6 +191,9 @@ class Fighter:
         self.xp = 0
         self.max_xp = xp
         self.death_function = death_function
+        self.lvl = lvl
+        self.wis = wis
+        self.att = att
 
     def take_damage(self, damage):
         if damage > 0:
@@ -216,6 +219,7 @@ class Fighter:
             self.max_xp = int(float(self.max_xp * 1.2))
             self.max_hp += 10
             self.hp += 10
+            self.lvl += 1
 
 class BasicMonster():
     #AI for a basic monster
@@ -379,8 +383,17 @@ def render_all():
         y += 1
 
     #show the player's stats
-    render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
-    render_bar(1, 2, BAR_WIDTH, 'XP', player.fighter.xp, player.fighter.max_xp, colors.dark_purple, colors.dark_gray)
+    render_bar(1, 2, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
+    render_bar(1, 3, BAR_WIDTH, 'XP', player.fighter.xp, player.fighter.max_xp, colors.dark_purple, colors.dark_gray)
+
+    panel.draw_str(1, 1, player.name, fg=colors.white)
+    panel.draw_str(len(player.name) + 5, 1, 'Lvl ' + str(player.fighter.lvl), fg=colors.green)
+    panel.draw_str(1, 4, 'C:' + str(player.fighter.cut), fg=colors.red)
+    panel.draw_str(6, 4, 'B:' + str(player.fighter.blunt), fg=colors.gray)
+    panel.draw_str(11, 4, 'P:' + str(player.fighter.pierce), fg=colors.orange)
+    panel.draw_str(16, 4, "M:" + str(player.fighter.magic), fg=colors.light_blue)
+    panel.draw_str(1, 5, "Att:" + str(player.fighter.att), fg=colors.white)
+    panel.draw_str(9, 5, "Wis:" + str(player.fighter.wis), fg=colors.white)
 
     panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
 
@@ -475,7 +488,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=75, defense=1, blunt=5, xp=50, death_function=player_death)
+fighter_component = Fighter(hp=75, defense=1, blunt=5, xp=50, att=3, wis=2, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), blocks=True, fighter=fighter_component)
 objects.append(player)
 
