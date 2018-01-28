@@ -12,14 +12,14 @@ SCREEN_WIDTH = 100
 SCREEN_HEIGHT = 80
 
 MAP_WIDTH = 100
-MAP_HEIGHT = 72
+MAP_HEIGHT = 71
 
 ROOM_MAX_SIZE = 17
 ROOM_MIN_SIZE = 9
 MAX_ROOMS = 38
 
 BAR_WIDTH = 20
-PANEL_HEIGHT = 8
+PANEL_HEIGHT = 9
 PANEL_Y = SCREEN_HEIGHT - PANEL_HEIGHT
 
 MSG_X = BAR_WIDTH + 2
@@ -30,8 +30,8 @@ FPS = 30
 
 FOV_ALGO = 'BASIC'
 FOV_LIGHT_WALLS = True
-TORCH_RADIUS = 10
-MAX_ROOM_MONSTERS = 4
+TORCH_RADIUS = 15
+MAX_ROOM_MONSTERS = 5
 
 color_dark_wall = (30, 30, 30)
 color_light_wall = (255, 255, 255)
@@ -176,7 +176,7 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, att=0, wis=0, xp=0, death_function=None, lvl=1):
+    def __init__(self, hp, defense, cut=0, blunt=0, pierce=0, magic=0, cut_res=1, blunt_res=1, pierce_res=1, magic_res=1, att=0, wis=0, xp=0, gold=0, death_function=None, lvl=1):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
@@ -194,6 +194,7 @@ class Fighter:
         self.lvl = lvl
         self.wis = wis
         self.att = att
+        self.gold = gold
 
     def take_damage(self, damage):
         if damage > 0:
@@ -205,21 +206,45 @@ class Fighter:
                 func(self.owner)
 
     def attack(self, target):
-        damage = self.strength - target.fighter.defense
+        damage = 0
+        if self.blunt > 0:
+            damage += int((self.att + self.blunt) * target.fighter.blunt_res)
+        if self.cut > 0:
+            damage += int((self.att + self.cut) * target.fighter.cut_res)
+        if self.pierce > 0:
+            damage += int((self.att + self.pierce) * target.fighter.pierce_res)
+        if self.magic > 0:
+            damage += int((self.wis + self.magic) * target.fighter.magic_res)
+
+        damage -= target.fighter.defense
+
+        damage_type = max(self.blunt, self.cut, self.pierce)
+
+        damage_adj = ' attacks '
+
+        if damage_type == self.blunt:
+            damage_adj = ' smashes '
+        elif damage_type == self.pierce:
+            damage_adj = ' stabs '
+        elif damage_type == self.cut:
+            damage_adj = ' slashes '
 
         if damage > 0:
-            message(self.owner.name.capitalize() + ' smacks ' + target.name + ' for ' + str(damage) + ' damage.')
+            message(self.owner.name.capitalize() + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
             target.fighter.take_damage(damage)
         else:
-            message(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
+            message(self.owner.name.capitalize() + ' tries to attack ' + target.name + ', but whiffs!')
 
-    def check_xp(self):
+    def check_xp(self, player):
         if self.xp >= self.max_xp:
             self.xp -= self.max_xp
-            self.max_xp = int(float(self.max_xp * 1.2))
-            self.max_hp += 10
+            self.max_xp = int(float(self.max_xp * 1.3))
+            self.max_hp += 15
             self.hp += 10
+            self.att += 1
+            self.wis += 1
             self.lvl += 1
+            message(player.name + ' is now level ' + str(player.fighter.lvl) + '!', colors.dark_green)
 
 class BasicMonster():
     #AI for a basic monster
@@ -387,13 +412,23 @@ def render_all():
     render_bar(1, 3, BAR_WIDTH, 'XP', player.fighter.xp, player.fighter.max_xp, colors.dark_purple, colors.dark_gray)
 
     panel.draw_str(1, 1, player.name, fg=colors.white)
-    panel.draw_str(len(player.name) + 5, 1, 'Lvl ' + str(player.fighter.lvl), fg=colors.green)
-    panel.draw_str(1, 4, 'C:' + str(player.fighter.cut), fg=colors.red)
-    panel.draw_str(6, 4, 'B:' + str(player.fighter.blunt), fg=colors.gray)
-    panel.draw_str(11, 4, 'P:' + str(player.fighter.pierce), fg=colors.orange)
-    panel.draw_str(16, 4, "M:" + str(player.fighter.magic), fg=colors.light_blue)
-    panel.draw_str(1, 5, "Att:" + str(player.fighter.att), fg=colors.white)
-    panel.draw_str(9, 5, "Wis:" + str(player.fighter.wis), fg=colors.white)
+    panel.draw_str(15, 1, 'Lvl ' + str(player.fighter.lvl), fg=colors.green)
+
+    panel.draw_str(1, 4, '$' + str(player.fighter.gold), fg=colors.yellow)
+
+    panel.draw_str(1, 5, 'C:' + str(player.fighter.cut), fg=colors.red)
+    panel.draw_str(7, 5, 'B:' + str(player.fighter.blunt), fg=colors.gray)
+    panel.draw_str(12, 5, 'P:' + str(player.fighter.pierce), fg=colors.orange)
+    panel.draw_str(17, 5, "M:" + str(player.fighter.magic), fg=colors.light_blue)
+
+    panel.draw_str(1, 6, 'Cx' + str(player.fighter.cut_res), fg=colors.red)
+    panel.draw_str(7, 6, 'Bx' + str(player.fighter.blunt_res), fg=colors.gray)
+    panel.draw_str(12, 6, 'Px' + str(player.fighter.pierce_res), fg=colors.orange)
+    panel.draw_str(17, 6, 'Mx' + str(player.fighter.magic_res), fg=colors.light_blue)
+
+    panel.draw_str(1, 7, "Att:" + str(player.fighter.att), fg=colors.white)
+    panel.draw_str(8, 7, "Wis:" + str(player.fighter.wis), fg=colors.white)
+    panel.draw_str(15, 7, 'Def:' + str(player.fighter.defense), fg=colors.white)
 
     panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
 
@@ -411,12 +446,12 @@ def place_objects(room):
         if not GameObject.is_blocked(GameObject, x, y):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=10, defense=0, cut=3, xp=8, death_function=monster_death)
+                monster_component = Fighter(hp=12, defense=2, cut=3, xp=8, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=14, defense=1, blunt=2, xp=6, death_function=monster_death)
+                monster_component = Fighter(hp=16, defense=1, blunt=2, xp=6, death_function=monster_death)
                 ai_component = BasicMonster()
                 monster = GameObject(x, y, 's', 'Slug', colors.amber, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
@@ -488,7 +523,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=75, defense=1, blunt=5, xp=50, att=3, wis=2, death_function=player_death)
+fighter_component = Fighter(hp=145, defense=1, blunt=5, xp=25, att=3, wis=2, gold=200, death_function=player_death)
 player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), blocks=True, fighter=fighter_component)
 objects.append(player)
 
@@ -540,7 +575,7 @@ while not tdl.event.is_window_closed():
     if player_action == 'exit':
         break
 
-    player.fighter.check_xp()
+    player.fighter.check_xp(player)
 
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for obj in objects:
