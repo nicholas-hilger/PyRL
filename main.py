@@ -62,28 +62,28 @@ def handle_keys():
     #Movement keys, only if the player isn't paused
     if game_state == 'playing':
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
-            player.move_or_attack(0, -1, objects)
+            player.move_or_attack(0, -1)
             fov_recompute = True
         elif user_input.key == 'DOWN' or user_input.key == 'KP2' or user_input.keychar == 'j':
-            player.move_or_attack(0, 1, objects)
+            player.move_or_attack(0, 1)
             fov_recompute = True
         elif user_input.key == 'RIGHT' or user_input.key == 'KP6' or user_input.keychar == 'l':
-            player.move_or_attack(1, 0, objects)
+            player.move_or_attack(1, 0)
             fov_recompute = True
         elif user_input.key == 'LEFT' or user_input.key == 'KP4' or user_input.keychar == 'h':
-            player.move_or_attack(-1, 0, objects)
+            player.move_or_attack(-1, 0)
             fov_recompute = True
         elif user_input.key == 'KP1':
-            player.move_or_attack(-1, 1, objects)
+            player.move_or_attack(-1, 1)
             fov_recompute = True
         elif user_input.key == 'KP3':
-            player.move_or_attack(1, 1, objects)
+            player.move_or_attack(1, 1)
             fov_recompute = True
         elif user_input.key == 'KP7':
-            player.move_or_attack(-1, -1, objects)
+            player.move_or_attack(-1, -1)
             fov_recompute = True
         elif user_input.key == 'KP9':
-            player.move_or_attack(1, -1, objects)
+            player.move_or_attack(1, -1)
             fov_recompute = True
         elif user_input.key == 'ESCAPE':
             return 'exit'
@@ -99,7 +99,7 @@ import math
 
 class GameObject:
     #A generic object. Always represented by a character on screen.
-    def __init__(self, x, y, char, name, color, my_map, objects, blocks=False, fighter=None, ai=None):
+    def __init__(self, x, y, char, name, color, blocks=False, fighter=None, ai=None):
         self.x = x
         self.y = y
         self.char = char
@@ -118,11 +118,11 @@ class GameObject:
             self.ai.owner = self
 
     def move(self, dx, dy):
-        if not self.is_blocked(self.x + dx, self.y + dy, self.my_map, self.objects):
+        if not self.is_blocked(self.x + dx, self.y + dy):
             self.x += dx
             self.y += dy
 
-    def move_or_attack(self, dx, dy, objects):
+    def move_or_attack(self, dx, dy):
         x = self.x + dx
         y = self.y + dy
 
@@ -143,7 +143,7 @@ class GameObject:
     def clear(self, con):
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
 
-    def is_blocked(self, x, y, my_map, objects):
+    def is_blocked(self, x, y):
         if my_map[x][y].blocked:
             return True
 
@@ -176,11 +176,13 @@ class GameObject:
 
 class Fighter:
     #Combat-related properties and methods
-    def __init__(self, hp, defense, strength, death_function=None):
+    def __init__(self, hp, defense, strength, xp=0, death_function=None):
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
         self.strength = strength
+        self.xp = 0
+        self.max_xp = xp
         self.death_function = death_function
 
     def take_damage(self, damage):
@@ -201,6 +203,12 @@ class Fighter:
         else:
             message(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
 
+    def check_xp(self):
+        if self.xp >= self.max_xp:
+            self.xp -= self.max_xp
+            self.max_xp = int(float(self.max_xp * 1.2))
+            self.max_hp += 10
+            self.hp += 10
 
 class BasicMonster():
     #AI for a basic monster
@@ -365,6 +373,7 @@ def render_all():
 
     #show the player's stats
     render_bar(1, 1, BAR_WIDTH, 'HP', player.fighter.hp, player.fighter.max_hp, colors.dark_green, colors.dark_gray)
+    render_bar(1, 2, BAR_WIDTH, 'XP', player.fighter.xp, player.fighter.max_xp, colors.dark_purple, colors.dark_gray)
 
     panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
 
@@ -379,17 +388,17 @@ def place_objects(room):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
+        if not GameObject.is_blocked(GameObject, x, y):
             if randint(0, 100) < 80:
                 #create a goblin
-                monster_component = Fighter(hp=10, defense=0, strength=3, death_function=monster_death)
+                monster_component = Fighter(hp=10, defense=0, strength=3, xp=8, death_function=monster_death)
                 ai_component = BasicMonster()
-                monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+                monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, blocks=True, fighter=monster_component, ai=ai_component)
             else:
                 #create a slug
-                monster_component = Fighter(hp=14, defense=1, strength=2, death_function=monster_death)
+                monster_component = Fighter(hp=14, defense=1, strength=2, xp=6, death_function=monster_death)
                 ai_component = BasicMonster()
-                monster = GameObject(x, y, 's', 'Slug', colors.amber, my_map, objects, blocks=True, fighter=monster_component, ai=ai_component)
+                monster = GameObject(x, y, 's', 'Slug', colors.amber, blocks=True, fighter=monster_component, ai=ai_component)
             objects.append(monster)
 
 
@@ -407,6 +416,7 @@ def monster_death(monster):
     message(monster.name.capitalize() + ' collapses in a pile of gore.', colors.red)
     monster.char = '%'
     monster.color = colors.crimson
+    player.fighter.xp += monster.fighter.max_xp
     monster.blocks = False
     monster.fighter = None
     monster.ai = None
@@ -458,8 +468,8 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-fighter_component = Fighter(hp=15, defense=1, strength=5, death_function=player_death)
-player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), my_map, objects, blocks=True, fighter=fighter_component)
+fighter_component = Fighter(hp=75, defense=1, strength=5, xp=50, death_function=player_death)
+player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), blocks=True, fighter=fighter_component)
 objects.append(player)
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
@@ -509,6 +519,8 @@ while not tdl.event.is_window_closed():
     player_action = handle_keys()
     if player_action == 'exit':
         break
+
+    player.fighter.check_xp()
 
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for obj in objects:
