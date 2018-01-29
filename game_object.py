@@ -25,8 +25,18 @@ class GameObject:
         self.name = name
         self.blocks = blocks
 
+    def is_blocked(x, y, my_map, objects):
+        if my_map[x][y].blocked:
+            return True
+
+        for obj in objects:
+            if obj.blocks and obj.x == x and obj.y == y:
+                return True
+
+        return False
+
     def move(self, dx, dy, my_map, objects):
-        if not self.is_blocked(self.x + dx, self.y + dy, my_map, objects):
+        if not GameObject.is_blocked(self.x + dx, self.y + dy, my_map, objects):
             self.x += dx
             self.y += dy
 
@@ -50,16 +60,6 @@ class GameObject:
 
     def clear(self, con):
         con.draw_char(self.x, self.y, ' ', self.color, bg=None)
-
-    def is_blocked(self, x, y, my_map, objects):
-        if my_map[x][y].blocked:
-            return True
-
-        for obj in objects:
-            if obj.blocks and obj.x == x and obj.y == y:
-                return True
-
-        return False
 
     def move_towards(self, target_x, target_y, my_map, objects):
         # vector from this object to the target, and distance

@@ -253,12 +253,13 @@ def render_all():
 
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
+    num_items = randint(0, MAX_ROOM_ITEMS)
 
     for i in range(num_monsters):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
+        if not GameObject.is_blocked(x, y, my_map, objects):
             monster = random.choice([
                 Goblin,
                 Slug,
@@ -306,7 +307,6 @@ my_map = [[Tile(True)
               for x in range(MAP_WIDTH)]
 
 player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, blunt=5, xp=50, att=3, wis=2, gold=200, death_function=player_death)
-#player = GameObject(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, '@', 'Rogue', (255, 255, 255), blocks=True, fighter=fighter_component)
 objects.append(player)
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
