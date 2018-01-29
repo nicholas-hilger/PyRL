@@ -8,6 +8,7 @@ import pygame
 from config import *
 from utils import *
 from game_object import *
+from death_functions import *
 
 mouse_coord = (0, 0)
 
@@ -17,16 +18,7 @@ last_combat = 0
 global fov_recompute
 fov_recompute = True
 
-def monster_death(monster):
-    message(monster.name.capitalize() + ' collapses in a pile of gore.', colors.red)
-    monster.char = '%'
-    monster.color = colors.crimson
-    player.xp += monster.max_xp
-    monster.blocks = False
-    monster.fighter = None
-    monster.ai = None
-    monster.name = monster.name + '\'s remains'
-    monster.send_to_back(objects)
+
 
 def handle_keys():
 
@@ -50,28 +42,28 @@ def handle_keys():
     if game_state == 'playing':
         turns += 1
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
-            player.move_or_attack(0, -1, objects, message, my_map)
+            player.move_or_attack(0, -1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'DOWN' or user_input.key == 'KP2' or user_input.keychar == 'j':
-            player.move_or_attack(0, 1, objects, message, my_map)
+            player.move_or_attack(0, 1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'RIGHT' or user_input.key == 'KP6' or user_input.keychar == 'l':
-            player.move_or_attack(1, 0, objects, message, my_map)
+            player.move_or_attack(1, 0, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'LEFT' or user_input.key == 'KP4' or user_input.keychar == 'h':
-            player.move_or_attack(-1, 0, objects, message, my_map)
+            player.move_or_attack(-1, 0, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'KP1':
-            player.move_or_attack(-1, 1, objects, message, my_map)
+            player.move_or_attack(-1, 1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'KP3':
-            player.move_or_attack(1, 1, objects, message, my_map)
+            player.move_or_attack(1, 1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'KP7':
-            player.move_or_attack(-1, -1, objects, message, my_map)
+            player.move_or_attack(-1, -1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'KP9':
-            player.move_or_attack(1, -1, objects, message, my_map)
+            player.move_or_attack(1, -1, objects, message, my_map, player)
             fov_recompute = True
         elif user_input.key == 'ESCAPE':
             return 'exit'
@@ -267,29 +259,16 @@ def place_objects(room):
         y = randint(room.y1 + 1, room.y2 - 1)
 
         if not GameObject.is_blocked(GameObject, x, y, my_map, objects):
-            if randint(0, 100) < 80:
-                pass
-                #create a goblin
-                #monster_component = Fighter(hp=27, defense=1, cut=7, xp=8, spd=3, magic_weak=1.5, death_function=monster_death)
-                #ai_component = BasicMonster()
-                #monster = GameObject(x, y, 'g', 'Goblin', colors.darker_green, blocks=True, fighter=monster_component, ai=ai_component)
-            else:
-                pass
-                #create a slug
-                #monster_component = Fighter(hp=19, blunt=4, xp=6, spd=2, cut_weak=1.5, death_function=monster_death)
-                #ai_component = BasicMonster()
-                #monster = GameObject(x, y, 's', 'Slug', colors.amber, blocks=True, fighter=monster_component, ai=ai_component)
-            #objects.append(monster)
+            monster = random.choice([
+                Goblin,
+                Slug,
+                Skeleton
+            ])
+            monster_instance = monster(x, y)
+            objects.append(monster_instance)
 
 
-def player_death(player):
-    global game_state
-    message('You died!', colors.dark_red)
-    game_state = 'dead'
 
-    #turn the player into a corpse
-    player.char = '%'
-    player.color = colors.dark_red
 
 
 def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
@@ -387,5 +366,5 @@ while not tdl.event.is_window_closed():
     if game_state == 'playing' and player_action != 'didnt-take-turn':
         for obj in objects:
             if obj.ai:
-                if turns % obj.fighter.spd == 0:
-                    obj.ai.take_turn(visible_tiles, player, turns, message)
+                if turns % obj.spd == 0:
+                    obj.ai.take_turn(obj, visible_tiles, player, turns, message)
