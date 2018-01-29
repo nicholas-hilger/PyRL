@@ -367,4 +367,4 @@ while not tdl.event.is_window_closed():
         for obj in objects:
             if obj.ai:
                 if turns % obj.spd == 0:
-                    obj.ai.take_turn(obj, visible_tiles, player, turns, message)
+                    obj.ai.take_turn(visible_tiles, player, turns, message, my_map, objects)

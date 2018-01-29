@@ -2,17 +2,28 @@ import colors
 import math
 from death_functions import *
 
+
+class BasicMonster:
+    # AI for a basic monster
+    def take_turn(self, visible_tiles, player, turns, message, my_map, objects):
+        # if you can see it, it can see you
+        monster = self.owner
+        if (monster.x, monster.y) in visible_tiles:
+            if monster.distance_to(player) >= 2:
+                monster.move_towards(player.x, player.y, my_map, objects)
+
+            elif player.hp > 0 and turns % monster.spd == 0:
+                monster.attack(player, message, player, objects)
+
 class GameObject:
     # A generic object. Always represented by a character on screen.
-    def __init__(self, x, y, char, name, color, my_map, objects, blocks=False):
+    def __init__(self, x, y, char, name, color, blocks=False):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
         self.name = name
         self.blocks = blocks
-        self.my_map = my_map
-        self.objects = objects
 
     def move(self, dx, dy, my_map, objects):
         if not self.is_blocked(self.x + dx, self.y + dy, my_map, objects):
@@ -50,7 +61,7 @@ class GameObject:
 
         return False
 
-    def move_towards(self, target_x, target_y):
+    def move_towards(self, target_x, target_y, my_map, objects):
         # vector from this object to the target, and distance
         dx = target_x - self.x
         dy = target_y - self.y
@@ -60,7 +71,7 @@ class GameObject:
         # convert to int so the movement is restricted to the grid
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
-        self.move(dx, dy)
+        self.move(dx, dy, my_map, objects)
 
     def distance_to(self, other):
         dx = other.x - self.x
@@ -79,7 +90,7 @@ class Fighter(GameObject):
                  cut_weak=1, blunt_weak=1, pierce_weak=1, magic_weak=1, att=0, wis=0, xp=0, gold=0, spd=1,
                  death_function=None, lvl=1, fighter=1):
 
-        super().__init__(x, y, char, name, color, blocks, ai)
+        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks)
 
         self.max_hp = hp
         self.hp = hp
@@ -101,10 +112,11 @@ class Fighter(GameObject):
         self.gold = gold
         self.spd = spd
         self.fighter = fighter
-        self.ai = ai
-
-        if self.ai:
+        if ai is not None:
+            self.ai = ai()
             self.ai.owner = self
+        else:
+            self.ai = None
 
     def take_damage(self, damage, message, player, objects):
         if damage > 0:
@@ -197,15 +209,3 @@ class Skeleton(Fighter):
         super().__init__(x, y, char='S', name='Skeleton', color=colors.white, hp=15, blocks=True, ai=BasicMonster, defense=0,
                          pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1)
 
-
-class BasicMonster:
-    # AI for a basic monster
-    def take_turn(self, visible_tiles, player, turns, message):
-        # if you can see it, it can see you
-        monster = self.ai.owner
-        if (monster.x, monster.y) in visible_tiles:
-            if monster.distance_to(player) >= 2:
-                monster.move_towards(player.x, player.y)
-
-            elif player.hp > 0 and turns % monster.fighter.spd == 0:
-                monster.attack(player, message)
