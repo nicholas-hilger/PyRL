@@ -1,8 +1,9 @@
+import colors
 import math
 
 class GameObject:
-    #A generic object. Always represented by a character on screen.
-    def __init__(self, x, y, char, name, color, my_map, objects, blocks=False, fighter=None, ai=None):
+    # A generic object. Always represented by a character on screen.
+    def __init__(self, x, y, char, name, color, my_map, objects, blocks=False, ai=None):
         self.x = x
         self.y = y
         self.char = char
@@ -11,21 +12,17 @@ class GameObject:
         self.blocks = blocks
         self.my_map = my_map
         self.objects = objects
-        self.fighter = fighter
-
-        if self.fighter:
-            self.fighter.owner = self
 
         self.ai = ai
         if self.ai:
             self.ai.owner = self
 
-    def move(self, dx, dy):
-        if not self.is_blocked(self.x + dx, self.y + dy, self.my_map, self.objects):
+    def move(self, dx, dy, my_map, objects):
+        if not self.is_blocked(self.x + dx, self.y + dy, my_map, objects):
             self.x += dx
             self.y += dy
 
-    def move_or_attack(self, dx, dy, objects):
+    def move_or_attack(self, dx, dy, objects, message, my_map):
         x = self.x + dx
         y = self.y + dy
 
@@ -35,12 +32,12 @@ class GameObject:
                 target = obj
                 break
         if target is not None:
-            self.fighter.attack(target)
+            self.fighter.attack(target, message)
         else:
-            self.move(dx, dy)
+            self.move(dx, dy, my_map, objects)
 
     def draw(self, con, vis_tiles):
-        if(self.x, self.y) in vis_tiles:
+        if (self.x, self.y) in vis_tiles:
             con.draw_char(self.x, self.y, self.char, self.color, bg=None)
 
     def clear(self, con):
@@ -57,13 +54,13 @@ class GameObject:
         return False
 
     def move_towards(self, target_x, target_y):
-        #vector from this object to the target, and distance
+        # vector from this object to the target, and distance
         dx = target_x - self.x
         dy = target_y - self.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
 
-        #normalize it to length 1 (preserving direction) then round it and
-        #convert to int so the movement is restricted to the grid
+        # normalize it to length 1 (preserving direction) then round it and
+        # convert to int so the movement is restricted to the grid
         dx = int(round(dx / distance))
         dy = int(round(dy / distance))
         self.move(dx, dy)
@@ -77,14 +74,35 @@ class GameObject:
         objects.remove(self)
         objects.insert(0, self)
 
-class Fighter:
-    #Combat-related properties and methods
-    def __init__(self, hp, defense, strength, death_function=None):
+
+class Fighter(GameObject):
+    # Combat-related properties and methods
+
+    def __init__(self, x, y, char, name, color, hp, blocks=False, ai=None, defense=0, cut=0, blunt=0, pierce=0, magic=0,
+                 cut_weak=1, blunt_weak=1, pierce_weak=1, magic_weak=1, att=0, wis=0, xp=0, gold=0, spd=1,
+                 death_function=None, lvl=1):
+
+        super().__init__(x, y, char, name, color, blocks, ai)
+
         self.max_hp = hp
         self.hp = hp
         self.defense = defense
-        self.strength = strength
+        self.cut = cut
+        self.blunt = blunt
+        self.pierce = pierce
+        self.magic = magic
+        self.cut_weak = cut_weak
+        self.blunt_weak = blunt_weak
+        self.pierce_weak = pierce_weak
+        self.magic_weak = magic_weak
+        self.xp = 0
+        self.max_xp = xp
         self.death_function = death_function
+        self.lvl = lvl
+        self.wis = wis
+        self.att = att
+        self.gold = gold
+        self.spd = spd
 
     def take_damage(self, damage):
         if damage > 0:
@@ -95,24 +113,90 @@ class Fighter:
             if func is not None:
                 func(self.owner)
 
-    def attack(self, target):
-        damage = self.strength - target.fighter.defense
+    def attack(self, target, player, message):
+        global last_combat
+        damage = 0
+        if self.blunt > 0:
+            damage += int((self.att + self.blunt) * target.fighter.blunt_weak)
+        if self.cut > 0:
+            damage += int((self.att + self.cut) * target.fighter.cut_weak)
+        if self.pierce > 0:
+            damage += int((self.att + self.pierce) * target.fighter.pierce_weak)
+        if self.magic > 0:
+            damage += int((self.wis + self.magic) * target.fighter.magic_weak)
+
+        damage -= target.fighter.defense
+
+        damage_type = max(self.blunt, self.cut, self.pierce, self.magic)
+
+        damage_adj = ' attacks '
+
+        if damage_type == self.blunt:
+            damage_adj = ' smashes '
+        elif damage_type == self.pierce:
+            damage_adj = ' stabs '
+        elif damage_type == self.cut:
+            damage_adj = ' slashes '
+        elif damage_type == self.magic:
+            damage_adj = ' blasts '
+
+        if self == player.fighter:
+            last_combat = 0
 
         if damage > 0:
-            message(self.owner.name.capitalize() + ' smacks ' + target.name + ' for ' + str(damage) + ' damage.')
+            message(self.owner.name.capitalize() + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
             target.fighter.take_damage(damage)
         else:
-            message(self.owner.name.capitalize() + ' bludgeons ' + target.name + ' but whiffs!')
+            message(self.owner.name.capitalize() + ' tries to attack ' + target.name + ', but whiffs!')
+
+    def check_xp(self, player, message):
+        if self.xp >= self.max_xp:
+            self.xp -= self.max_xp
+            self.max_xp = int(float(self.max_xp * 1.3))
+            self.max_hp += 15
+            self.hp += 10
+            self.att += 1
+            self.wis += 1
+            self.lvl += 1
+            message(player.name + ' is now level ' + str(player.fighter.lvl) + '!', colors.dark_green)
+
+    def check_limits(self):
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+        if self.gold > 9999:
+            self.gold = 9999
+
+        if self.att < 1:
+            self.att = 1
+        if self.att > 99:
+            self.att = 99
+
+        if self.defense < 1:
+            self.defense = 1
+        if self.defense > 99:
+            self.defense = 99
+
+        if self.wis < 1:
+            self.wis = 1
+        if self.wis > 99:
+            self.wis = 99
+
+class Goblin(Fighter):
+    def __init__(self, x, y):
+        super().__init__(x, y, char='g', name='Goblin', color=colors.dark_green, hp=27, blocks=True, ai=None, defense=1,
+                         cut=7,
+                         magic_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1)
 
 
 class BasicMonster():
-    #AI for a basic monster
-    def take_turn(self, visible_tiles, player):
-        #if you can see it, it can see you
+    # AI for a basic monster
+    def take_turn(self, visible_tiles, player, turns, message):
+        # if you can see it, it can see you
         monster = self.owner
         if (monster.x, monster.y) in visible_tiles:
             if monster.distance_to(player) >= 2:
                 monster.move_towards(player.x, player.y)
 
-            elif player.fighter.hp > 0:
-                monster.fighter.attack(player)
+            elif player.fighter.hp > 0 and turns % monster.fighter.spd == 0:
+                monster.fighter.attack(player, message)
