@@ -168,7 +168,7 @@ class Fighter(GameObject):
             self.att += 1
             self.wis += 1
             self.lvl += 1
-            message(player.name + ' is now level ' + str(player.fighter.lvl) + '!', colors.dark_green)
+            message(player.name + ' is now level ' + str(player.lvl) + '!', colors.dark_green)
 
     def check_limits(self):
         if self.hp > self.max_hp:
