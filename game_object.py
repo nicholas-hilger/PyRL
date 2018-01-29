@@ -49,7 +49,7 @@ class GameObject:
             if obj.x == x and obj.y == y and obj.fighter:
                 target = obj
                 break
-        if target is not None:
+        if target is not None and target.ai:
             self.attack(target, message, player, objects)
         else:
             self.move(dx, dy, my_map, objects)
@@ -128,36 +128,38 @@ class Fighter(GameObject):
                 func(self, message, player, objects)
 
     def attack(self, target, message, player, objects):
-        damage = 0
-        if self.blunt > 0:
-            damage += int((self.att + self.blunt) * target.blunt_weak)
-        if self.cut > 0:
-            damage += int((self.att + self.cut) * target.cut_weak)
-        if self.pierce > 0:
-            damage += int((self.att + self.pierce) * target.pierce_weak)
-        if self.magic > 0:
-            damage += int((self.wis + self.magic) * target.magic_weak)
+        if target.ai:
 
-        damage -= target.defense
+            damage = 0
+            if self.blunt > 0:
+                damage += int((self.att + self.blunt) * target.blunt_weak)
+            if self.cut > 0:
+                damage += int((self.att + self.cut) * target.cut_weak)
+            if self.pierce > 0:
+                damage += int((self.att + self.pierce) * target.pierce_weak)
+            if self.magic > 0:
+                damage += int((self.wis + self.magic) * target.magic_weak)
 
-        damage_type = max(self.blunt, self.cut, self.pierce, self.magic)
+            damage -= target.defense
 
-        damage_adj = ' attacks '
+            damage_type = max(self.blunt, self.cut, self.pierce, self.magic)
 
-        if damage_type == self.blunt:
-            damage_adj = ' smashes '
-        elif damage_type == self.pierce:
-            damage_adj = ' stabs '
-        elif damage_type == self.cut:
-            damage_adj = ' slashes '
-        elif damage_type == self.magic:
-            damage_adj = ' blasts '
+            damage_adj = ' attacks '
 
-        if damage > 0:
-            message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
-            target.take_damage(damage, message, player, objects)
-        else:
-            message(self.name + ' tries to attack ' + target.name + ', but whiffs!')
+            if damage_type == self.blunt:
+                damage_adj = ' smashes '
+            elif damage_type == self.pierce:
+                damage_adj = ' stabs '
+            elif damage_type == self.cut:
+                damage_adj = ' slashes '
+            elif damage_type == self.magic:
+                damage_adj = ' blasts '
+
+            if damage > 0:
+                message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
+                target.take_damage(damage, message, player, objects)
+            else:
+                message(self.name + ' tries to attack ' + target.name + ', but whiffs!')
 
     def check_xp(self, player, message):
         if self.xp >= self.max_xp:
@@ -205,8 +207,37 @@ class Slug(Fighter):
                          blunt=4, pierce_weak=1.5, xp=5, gold=28, spd=2, death_function=monster_death, lvl=1)
 
 
-class Lesser_Undead(Fighter):
+class LesserUndead(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=9, blocks=True, ai=BasicMonster, defense=0,
                          pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1)
 
+
+class Item(GameObject):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None):
+
+        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks)
+
+        self.hp = hp
+        self.att = att
+        self.wis = wis
+        self.fighter = fighter
+
+        if ai is not None:
+            self.ai = ai()
+            self.ai.owner = self
+        else:
+            self.ai = None
+
+    def pick_up(self, inv, message, objects):
+        if len(inv) >= 26:
+            message('Your inventory is full! You leave ' + self.name + ' behind.', colors.light_red)
+        else:
+            inv.append(self)
+            objects.remove(self)
+            message('You pick up the ' + self.name + '.', colors.green)
+
+
+class HealingPotion(Item):
+    def __init__(self, x, y):
+        super().__init__(x, y, char='!', hp=0, name='Healing Potion', color=colors.violet, ai=None, blocks=False)

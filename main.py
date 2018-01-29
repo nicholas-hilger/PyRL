@@ -74,6 +74,7 @@ def handle_keys():
             #Alt-enter toggles fullscreen
             tdl.set_fullscreen(not tdl.get_fullscreen())'''
 
+
 def get_names_under_mouse():
     global visible_tiles
 
@@ -83,7 +84,7 @@ def get_names_under_mouse():
              if obj.x == x and obj.y == y and (obj.x, obj.y) in visible_tiles]
 
     names = ', '.join(names) #join the names, seperated by commas
-    return names.capitalize()
+    return names
 
 
 def create_room(room):
@@ -263,10 +264,20 @@ def place_objects(room):
             monster = random.choice([
                 Goblin,
                 Slug,
-                Lesser_Undead
+                LesserUndead
             ])
             monster_instance = monster(x, y)
             objects.append(monster_instance)
+
+    for i in range(num_items):
+        x = randint(room.x1 + 1, room.x2 - 1)
+        y = randint(room.y1 + 1, room.y2 - 1)
+
+        if not GameObject.is_blocked(x, y, my_map, objects):
+            item = HealingPotion(x, y)
+
+            objects.append(item)
+            item.send_to_back(objects)
 
 
 
@@ -298,7 +309,7 @@ con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
 objects = []
-
+inventory = []
 
 music_play = 1
 
