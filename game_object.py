@@ -154,10 +154,10 @@ class Fighter(GameObject):
             damage_adj = ' blasts '
 
         if damage > 0:
-            message(self.name.capitalize() + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
+            message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
             target.take_damage(damage, message, player, objects)
         else:
-            message(self.name.capitalize() + ' tries to attack ' + target.name + ', but whiffs!')
+            message(self.name + ' tries to attack ' + target.name + ', but whiffs!')
 
     def check_xp(self, player, message):
         if self.xp >= self.max_xp:
@@ -192,6 +192,7 @@ class Fighter(GameObject):
         if self.wis > 99:
             self.wis = 99
 
+
 class Goblin(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='g', name='Goblin', color=colors.darker_green, hp=27, blocks=True, ai=BasicMonster, defense=1,
@@ -204,8 +205,8 @@ class Slug(Fighter):
                          blunt=4, pierce_weak=1.5, xp=5, gold=28, spd=2, death_function=monster_death, lvl=1)
 
 
-class Skeleton(Fighter):
+class Lesser_Undead(Fighter):
     def __init__(self, x, y):
-        super().__init__(x, y, char='S', name='Skeleton', color=colors.white, hp=15, blocks=True, ai=BasicMonster, defense=0,
+        super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=9, blocks=True, ai=BasicMonster, defense=0,
                          pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1)
 
