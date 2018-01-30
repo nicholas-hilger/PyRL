@@ -209,12 +209,12 @@ class Slug(Fighter):
 
 class LesserUndead(Fighter):
     def __init__(self, x, y):
-        super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=9, blocks=True, ai=BasicMonster, defense=0,
+        super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=15, blocks=True, ai=BasicMonster, defense=0,
                          pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1)
 
 
 class Item(GameObject):
-    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None, item=1):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks)
 
@@ -222,6 +222,7 @@ class Item(GameObject):
         self.att = att
         self.wis = wis
         self.fighter = fighter
+        self.item = item
 
         if ai is not None:
             self.ai = ai()

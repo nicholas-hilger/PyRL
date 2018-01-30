@@ -68,6 +68,14 @@ def handle_keys():
         elif user_input.key == 'ESCAPE':
             return 'exit'
         else:
+            if user_input.text == 'g':
+                for obj in objects:
+                    if obj.x == player.x and obj.y == player.y and obj.item:
+                        obj.pick_up(inventory, message, objects)
+                        break
+            if user_input.text == "i":
+                inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
+
             return 'didnt-take-turn'
 
         '''elif user_input.key == 'ENTER' and user_input.alt:
@@ -296,7 +304,50 @@ def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
     panel.draw_str(x, y, text, fg=colors.white, bg=None)
 
 
+def menu(header, options, width):
+    if len(options) > 26:
+        raise ValueError('Cannot have a menu with more than 26 options')
 
+    #Calculate the total height for the header (after textwrap) and one line per option
+    header_wrapped = []
+    for header_line in header.splitlines():
+        header_wrapped.extend(textwrap.wrap(header_line, width))
+    header_height = len(header_wrapped)
+    height = len(options) + header_height
+
+    #print the header, with wrapped text
+    window = tdl.Console(width, height)
+    window.draw_rect(0, 0, width, height, None, fg=colors.white, bg=None)
+    for i, line in enumerate(header_wrapped):
+        window.draw_str(0, 0+i, header_wrapped[i])
+
+    y = header_height
+    letter_index = ord('a')
+    for option_text in options:
+        text = '(' + chr(letter_index) + ') ' + option_text
+        window.draw_str(0, y, text, bg=None)
+        y += 1
+        letter_index += 1
+
+    #blit these contents to the root console
+    x = SCREEN_WIDTH//2 - width//2
+    y = 0
+    root.blit(window, x, y, width, height, 0, 0)
+
+    #present the root console to the player and wait for a key-press
+    tdl.flush()
+    key = tdl.event.key_wait()
+    key_char = key.char
+    if key_char == '':
+        key_char = ' ' #a placeholder
+
+
+def inventory_menu(header):
+    if len(inventory) == 0:
+        options = ['You don\'t have anything']
+    else:
+        options = [item.name for item in inventory]
+    index = menu(header, options, INVENTORY_WIDTH)
 
 #######################
 #Init and Main Loop   #
@@ -317,7 +368,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, blunt=5, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, cut=2, blunt=3, xp=50, att=3, wis=2, gold=200, death_function=player_death)
 objects.append(player)
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
