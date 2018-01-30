@@ -39,32 +39,39 @@ def handle_keys():
         return 'didnt-take-turn'
 
     #Movement keys, only if the player isn't paused
-    if game_state == 'playing':
-        turns += 1
+    if game_state == 'playing' and player.hp > 0:
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
             player.move_or_attack(0, -1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'DOWN' or user_input.key == 'KP2' or user_input.keychar == 'j':
             player.move_or_attack(0, 1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'RIGHT' or user_input.key == 'KP6' or user_input.keychar == 'l':
             player.move_or_attack(1, 0, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'LEFT' or user_input.key == 'KP4' or user_input.keychar == 'h':
             player.move_or_attack(-1, 0, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'KP1':
             player.move_or_attack(-1, 1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'KP3':
             player.move_or_attack(1, 1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'KP7':
             player.move_or_attack(-1, -1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'KP9':
             player.move_or_attack(1, -1, objects, message, my_map, player)
             fov_recompute = True
+            turns += 1
         elif user_input.key == 'ESCAPE':
             return 'exit'
         else:
@@ -77,6 +84,7 @@ def handle_keys():
                 chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
                 if chosen_item is not None:
                     chosen_item.use(inventory, message)
+                    return 'playing'
 
             return 'didnt-take-turn'
 
@@ -284,7 +292,10 @@ def place_objects(room):
         y = randint(room.y1 + 1, room.y2 - 1)
 
         if not GameObject.is_blocked(x, y, my_map, objects):
-            item = HealingPotion(x, y, cast_heal)
+            item = random.choice([
+                HealingPotion(x, y, cast_heal),
+                LesserHealingPotion(x, y, cast_lesser_heal)
+                ])
 
             objects.append(item)
             item.send_to_back(objects)
@@ -365,7 +376,25 @@ def cast_heal():
         return 'cancelled'
 
     message('Your wounds feel healed.', colors.light_violet)
-    player.heal(int(player.max_hp/5))
+    player.heal(int(player.max_hp/4))
+
+
+def cast_lesser_heal():
+    if player.hp == player.max_hp:
+        message('You\'re already at full health!', colors.light_green)
+        return 'cancelled'
+
+    message('Your feel slightly healed.', colors.light_violet)
+    player.heal(int(player.max_hp/10))
+
+
+def cast_greater_heal():
+    if player.hp == player.max_hp:
+        message('You\'re already at full health!', colors.light_green)
+        return 'cancelled'
+
+    message('Your wounds and aches disappear!.', colors.light_violet)
+    player.heal(int(player.max_hp/2))
 
 
 #######################

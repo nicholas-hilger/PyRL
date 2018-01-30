@@ -127,7 +127,10 @@ class Fighter(GameObject):
             self.hp = 0
             func = self.death_function
             if func is not None:
-                func(self, message, player, objects)
+                if self != player:
+                    func(self, message, player, objects)
+                else:
+                    func(self, message)
 
     def attack(self, target, message, player, objects):
             damage = 0
@@ -248,7 +251,12 @@ class Item(GameObject):
             message('The ' + self.name + ' cannot be used.', colors.light_red)
         else:
             if self.use_function() != 'cancelled':
-                inventory.remove(self) # destroy after use, unless it was cancelled for some reason
+                inventory.remove(self) #destroy after use, unless it was cancelled for some reason
+
+
+class LesserHealingPotion(Item):
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='!', hp=15, name='Lesser Healing Potion', color=colors.lighter_violet, ai=None, blocks=False, use_function=use_function)
 
 
 class HealingPotion(Item):
