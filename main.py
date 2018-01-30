@@ -74,7 +74,9 @@ def handle_keys():
                         obj.pick_up(inventory, message, objects)
                         break
             if user_input.text == "i":
-                inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
+                chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
+                if chosen_item is not None:
+                    chosen_item.use(inventory, message)
 
             return 'didnt-take-turn'
 
@@ -282,13 +284,10 @@ def place_objects(room):
         y = randint(room.y1 + 1, room.y2 - 1)
 
         if not GameObject.is_blocked(x, y, my_map, objects):
-            item = HealingPotion(x, y)
+            item = HealingPotion(x, y, cast_heal)
 
             objects.append(item)
             item.send_to_back(objects)
-
-
-
 
 
 def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
@@ -341,13 +340,33 @@ def menu(header, options, width):
     if key_char == '':
         key_char = ' ' #a placeholder
 
+    index = ord(key_char) - ord('a')
+    if index >= 0 and index < len(options):
+        return index
+    return None
+
 
 def inventory_menu(header):
     if len(inventory) == 0:
         options = ['You don\'t have anything']
     else:
         options = [item.name for item in inventory]
+
     index = menu(header, options, INVENTORY_WIDTH)
+
+    if index is None or len(inventory) == 0:
+        return None
+    return inventory[index]
+
+
+def cast_heal():
+    if player.hp == player.max_hp:
+        message('You\'re already at full health!', colors.light_green)
+        return 'cancelled'
+
+    message('Your wounds feel healed.', colors.light_violet)
+    player.heal(int(player.max_hp/5))
+
 
 #######################
 #Init and Main Loop   #
@@ -368,7 +387,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, cut=2, blunt=3, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, blunt=5, xp=50, att=3, wis=2, gold=200, death_function=player_death)
 objects.append(player)
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)

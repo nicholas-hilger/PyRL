@@ -17,13 +17,15 @@ class BasicMonster:
 
 class GameObject:
     # A generic object. Always represented by a character on screen.
-    def __init__(self, x, y, char, name, color, blocks=False):
+    def __init__(self, x, y, char, name, color, blocks=False, creature=0, item=0):
         self.x = x
         self.y = y
         self.char = char
         self.color = color
         self.name = name
         self.blocks = blocks
+        self.creature = creature
+        self.item = item
 
     def is_blocked(x, y, my_map, objects):
         if my_map[x][y].blocked:
@@ -46,7 +48,7 @@ class GameObject:
 
         target = None
         for obj in objects:
-            if obj.x == x and obj.y == y and obj.fighter:
+            if obj.x == x and obj.y == y and obj.creature:
                 target = obj
                 break
         if target is not None and target.ai:
@@ -88,9 +90,9 @@ class Fighter(GameObject):
 
     def __init__(self, x, y, char, name, color, hp, blocks=False, ai=None, defense=0, cut=0, blunt=0, pierce=0, magic=0,
                  cut_weak=1, blunt_weak=1, pierce_weak=1, magic_weak=1, att=0, wis=0, xp=0, gold=0, spd=1,
-                 death_function=None, lvl=1, fighter=1):
+                 death_function=None, lvl=1, creature=1):
 
-        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks)
+        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks, creature=creature)
 
         self.max_hp = hp
         self.hp = hp
@@ -111,7 +113,7 @@ class Fighter(GameObject):
         self.att = att
         self.gold = gold
         self.spd = spd
-        self.fighter = fighter
+        self.creature = creature
         if ai is not None:
             self.ai = ai()
             self.ai.owner = self
@@ -128,8 +130,6 @@ class Fighter(GameObject):
                 func(self, message, player, objects)
 
     def attack(self, target, message, player, objects):
-        if target.ai:
-
             damage = 0
             if self.blunt > 0:
                 damage += int((self.att + self.blunt) * target.blunt_weak)
@@ -194,35 +194,40 @@ class Fighter(GameObject):
         if self.wis > 99:
             self.wis = 99
 
+    def heal(self, amount):
+        self.hp += amount
+        self.check_limits()
+
 
 class Goblin(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='g', name='Goblin', color=colors.darker_green, hp=27, blocks=True, ai=BasicMonster, defense=1,
-                         cut=7, magic_weak=1.5, cut_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1)
+                         cut=7, magic_weak=1.5, cut_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1, creature=1)
 
 
 class Slug(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='s', name='Slug', color=colors.amber, hp=19, blocks=True, ai=BasicMonster, defense=1,
-                         blunt=4, pierce_weak=1.5, xp=5, gold=28, spd=2, death_function=monster_death, lvl=1)
+                         blunt=4, pierce_weak=1.5, xp=5, gold=28, spd=2, death_function=monster_death, lvl=1, creature=1)
 
 
 class LesserUndead(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=15, blocks=True, ai=BasicMonster, defense=0,
-                         pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1)
+                         pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1, creature=1)
 
 
 class Item(GameObject):
-    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None, item=1):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None, item=1, use_function=None):
 
-        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks)
+        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks, item=1)
 
         self.hp = hp
         self.att = att
         self.wis = wis
         self.fighter = fighter
         self.item = item
+        self.use_function = use_function
 
         if ai is not None:
             self.ai = ai()
@@ -230,15 +235,22 @@ class Item(GameObject):
         else:
             self.ai = None
 
-    def pick_up(self, inv, message, objects):
-        if len(inv) >= 26:
+    def pick_up(self, inventory, message, objects):
+        if len(inventory) >= 26:
             message('Your inventory is full! You leave ' + self.name + ' behind.', colors.light_red)
         else:
-            inv.append(self)
+            inventory.append(self)
             objects.remove(self)
             message('You pick up the ' + self.name + '.', colors.green)
 
+    def use(self, inventory, message):
+        if self.use_function is None:
+            message('The ' + self.name + ' cannot be used.', colors.light_red)
+        else:
+            if self.use_function() != 'cancelled':
+                inventory.remove(self) # destroy after use, unless it was cancelled for some reason
+
 
 class HealingPotion(Item):
-    def __init__(self, x, y):
-        super().__init__(x, y, char='!', hp=0, name='Healing Potion', color=colors.violet, ai=None, blocks=False)
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='!', hp=15, name='Healing Potion', color=colors.violet, ai=None, blocks=False, use_function=use_function)
