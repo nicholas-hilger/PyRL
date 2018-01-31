@@ -48,7 +48,7 @@ class GameObject:
 
         target = None
         for obj in objects:
-            if obj.x == x and obj.y == y and obj.creature:
+            if obj.x == x and obj.y == y and obj.blocks:
                 target = obj
                 break
         if target is not None and target.ai:
