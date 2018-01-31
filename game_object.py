@@ -17,9 +17,22 @@ class BasicMonster:
             elif player.hp > 0 and turns % monster.spd == 0:
                 monster.attack(player, message, player, objects)
 
+
 class ConfusedMonster:
-    def take_turn(self, old_ai, my_map, objects, num_turns=CONFUSE_NUM_TURNS):
-        self.move(random.randint(-1, 1), random.randint(-1, 1), my_map, objects)
+    def __init__(self, old_ai, message, num_turns=CONFUSE_NUM_TURNS):
+        self.old_ai = old_ai
+        self.num_turns = num_turns
+        self.message = message
+
+    def take_turn(self, visible_tiles, player, turns, message, my_map, objects):
+        if self.num_turns > 0:
+            self.owner.move(random.randint(-1, 1), random.randint(-1, 1), my_map, objects)
+
+            self.num_turns -= 1
+
+        else:
+            self.owner.ai = self.old_ai
+            self.message('The ' + self.owner.name + ' is no longer confused!', colors.red)
 
 class GameObject:
     # A generic object. Always represented by a character on screen.
@@ -273,3 +286,8 @@ class HealingPotion(Item):
 class LightningScroll(Item):
     def __init__(self, x, y, use_function=None):
         super().__init__(x=x, y=y, char='?', name='Scroll of Lightning Bolt', color=colors.lighter_sepia, ai=None, blocks=False, use_function=use_function)
+
+
+class ConfuseScroll(Item):
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='?', name='Scroll of Confusion', color=colors.lighter_sepia, ai=None, blocks=False, use_function=use_function)
