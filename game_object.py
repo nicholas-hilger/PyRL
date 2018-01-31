@@ -99,6 +99,9 @@ class GameObject:
         dy = other.y - self.y
         return math.sqrt(dx ** 2 + dy ** 2)
 
+    def distance(self, x, y):
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
+
     def send_to_back(self, objects):
         objects.remove(self)
         objects.insert(0, self)
@@ -285,9 +288,14 @@ class HealingPotion(Item):
 
 class LightningScroll(Item):
     def __init__(self, x, y, use_function=None):
-        super().__init__(x=x, y=y, char='?', name='Scroll of Lightning Bolt', color=colors.lighter_sepia, ai=None, blocks=False, use_function=use_function)
+        super().__init__(x=x, y=y, char='?', name='Scroll of Lightning Bolt', color=SCROLL_COLOR, ai=None, blocks=False, use_function=use_function)
 
 
 class ConfuseScroll(Item):
     def __init__(self, x, y, use_function=None):
-        super().__init__(x=x, y=y, char='?', name='Scroll of Confusion', color=colors.lighter_sepia, ai=None, blocks=False, use_function=use_function)
+        super().__init__(x=x, y=y, char='?', name='Scroll of Confusion', color=SCROLL_COLOR, ai=None, blocks=False, use_function=use_function)
+
+
+class FireballScroll(Item):
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='?', name='Scroll of Fireball', color=SCROLL_COLOR, ai=None, blocks=False, use_function=use_function)

@@ -19,7 +19,6 @@ global fov_recompute
 fov_recompute = True
 
 
-
 def handle_keys():
 
     global fov_recompute
@@ -296,7 +295,8 @@ def place_objects(room):
                 HealingPotion(x, y, cast_heal),
                 LesserHealingPotion(x, y, cast_lesser_heal),
                 LightningScroll(x, y, cast_lightning),
-                ConfuseScroll(x, y, cast_confuse)
+                ConfuseScroll(x, y, cast_confuse),
+                FireballScroll(x, y, cast_fireball)
                 ])
 
             objects.append(item)
@@ -406,7 +406,7 @@ def cast_lightning():
         return 'cancelled'
 
     message('The lightning bolt strikes ' + monster.name + ' for ' + str(LIGHTNING_DAMAGE) + ' damage.', colors.dark_yellow)
-    monster.take_damage(int((monster.max_hp/8)+LIGHTNING_DAMAGE), message, player, objects)
+    monster.take_damage(int((monster.max_hp/8)+LIGHTNING_DAMAGE+player.wis), message, player, objects)
 
 
 def cast_confuse():
@@ -421,6 +421,20 @@ def cast_confuse():
     message(monster.name + ' starts stumbling around in a daze.', colors.light_blue)
 
 
+def cast_fireball():
+    message('Left-click a target tile for the fireball, or right-click to cancel.', colors.light_cyan)
+    (x, y) = target_tile()
+    if x is None:
+        message('Cancelled.', colors.light_red)
+        return 'cancelled'
+    message('The fireball explodes, scorching everything within ' + str(FIREBALL_RADIUS) + ' feet!', colors.orange)
+
+    for obj in objects:
+        if obj.distance(x, y) <= FIREBALL_RADIUS and obj.blocks:
+            message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE+player.wis) + ' damage!', colors.orange)
+            obj.take_damage(FIREBALL_DAMAGE+player.wis, message, player, objects)
+
+
 def closest_monster(max_range):
     closest_enemy = None
     closest_dist = max_range + 1 #start with slightly more than max range
@@ -432,6 +446,29 @@ def closest_monster(max_range):
                 closest_enemy = obj
                 closest_dist = dist
     return closest_enemy
+
+
+def target_tile(max_range=None):
+    #return the position of a tile left-clicked in player's FOV (optionally
+    #in a range) or (None, None) if right-clicked
+    global mouse_coord
+    while True:
+        tdl.flush()
+        clicked = False
+        for event in tdl.event.get():
+            if event.type == 'MOUSEMOTION':
+                mouse_coord = event.cell
+            if event.type == 'MOUSEDOWN' and event.button == 'LEFT':
+                clicked = True
+            elif ((event.type == 'MOUSEDOWN' and event.button == 'RIGHT') or
+                  (event.type == 'KEYDOWN' and event.key == 'ESCAPE')):
+                return (None, None)
+        render_all()
+
+        x = mouse_coord[0]
+        y = mouse_coord[1]
+        if clicked and mouse_coord in visible_tiles and (max_range is None or player.distance(x, y) <= max_range):
+            return mouse_coord
 
 #######################
 #Init and Main Loop   #
