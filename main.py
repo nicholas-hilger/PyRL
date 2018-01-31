@@ -374,7 +374,7 @@ def inventory_menu(header):
 
 def cast_heal():
     if player.hp == player.max_hp:
-        message('You\'re already at full health!', colors.light_green)
+        message('You\'re already at full health!', colors.light_red)
         return 'cancelled'
 
     message('Your wounds feel healed.', colors.light_violet)
@@ -383,7 +383,7 @@ def cast_heal():
 
 def cast_lesser_heal():
     if player.hp == player.max_hp:
-        message('You\'re already at full health!', colors.light_green)
+        message('You\'re already at full health!', colors.light_red)
         return 'cancelled'
 
     message('Your feel slightly healed.', colors.light_violet)
@@ -392,7 +392,7 @@ def cast_lesser_heal():
 
 def cast_greater_heal():
     if player.hp == player.max_hp:
-        message('You\'re already at full health!', colors.light_green)
+        message('You\'re already at full health!', colors.light_red)
         return 'cancelled'
 
     message('Your wounds and aches disappear!.', colors.light_violet)
@@ -405,8 +405,8 @@ def cast_lightning():
         message('No enemy in range.', colors.red)
         return 'cancelled'
 
-    message('The lightning bolt strikes ' + monster.name + ' for ' + str(LIGHTNING_DAMAGE) + ' damage.', colors.dark_yellow)
-    monster.take_damage(int((monster.max_hp/8)+LIGHTNING_DAMAGE+player.wis), message, player, objects)
+    message('The lightning bolt strikes ' + monster.name + ' for ' + str(LIGHTNING_DAMAGE+player.wis+player.magic) + ' damage.', colors.dark_yellow)
+    monster.take_damage((LIGHTNING_DAMAGE+player.wis+player.magic), message, player, objects)
 
 
 def cast_confuse():
