@@ -1,6 +1,8 @@
 import colors
 import math
 from death_functions import *
+from config import *
+import random
 
 
 class BasicMonster:
@@ -14,6 +16,10 @@ class BasicMonster:
 
             elif player.hp > 0 and turns % monster.spd == 0:
                 monster.attack(player, message, player, objects)
+
+class ConfusedMonster:
+    def take_turn(self, old_ai, my_map, objects, num_turns=CONFUSE_NUM_TURNS):
+        self.move(random.randint(-1, 1), random.randint(-1, 1), my_map, objects)
 
 class GameObject:
     # A generic object. Always represented by a character on screen.
@@ -256,9 +262,14 @@ class Item(GameObject):
 
 class LesserHealingPotion(Item):
     def __init__(self, x, y, use_function=None):
-        super().__init__(x=x, y=y, char='!', hp=15, name='Lesser Healing Potion', color=colors.lighter_violet, ai=None, blocks=False, use_function=use_function)
+        super().__init__(x=x, y=y, char='!', name='Lesser Healing Potion', color=colors.lighter_violet, ai=None, blocks=False, use_function=use_function)
 
 
 class HealingPotion(Item):
     def __init__(self, x, y, use_function=None):
-        super().__init__(x=x, y=y, char='!', hp=15, name='Healing Potion', color=colors.violet, ai=None, blocks=False, use_function=use_function)
+        super().__init__(x=x, y=y, char='!', name='Healing Potion', color=colors.violet, ai=None, blocks=False, use_function=use_function)
+
+
+class LightningScroll(Item):
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='?', name='Scroll of Lightning Bolt', color=colors.lighter_sepia, ai=None, blocks=False, use_function=use_function)

@@ -294,7 +294,8 @@ def place_objects(room):
         if not GameObject.is_blocked(x, y, my_map, objects):
             item = random.choice([
                 HealingPotion(x, y, cast_heal),
-                LesserHealingPotion(x, y, cast_lesser_heal)
+                LesserHealingPotion(x, y, cast_lesser_heal),
+                LightningScroll(x, y, cast_lightning)
                 ])
 
             objects.append(item)
@@ -396,6 +397,28 @@ def cast_greater_heal():
     message('Your wounds and aches disappear!.', colors.light_violet)
     player.heal(int(player.max_hp/2))
 
+
+def cast_lightning():
+    monster = closest_monster(LIGHTNING_RANGE)
+    if monster is None: #no enemy found in range
+        message('No enemy in range.', colors.red)
+        return 'cancelled'
+
+    message('The lightning bolt strikes ' + monster.name + ' for ' + str(LIGHTNING_DAMAGE) + ' damage.', colors.dark_yellow)
+    monster.take_damage(int((monster.max_hp/8)+LIGHTNING_DAMAGE), message, player, objects)
+
+
+def closest_monster(max_range):
+    closest_enemy = None
+    closest_dist = max_range + 1 #start with slightly more than max range
+
+    for obj in objects:
+        if obj.blocks and not obj == player and (obj.x, obj.y) in visible_tiles:
+            dist = player.distance_to(obj)
+            if dist < closest_dist:
+                closest_enemy = obj
+                closest_dist = dist
+    return closest_enemy
 
 #######################
 #Init and Main Loop   #
