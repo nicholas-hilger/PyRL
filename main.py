@@ -341,14 +341,16 @@ def place_objects(room):
             item = random.choice([
                 RustySword(x, y),
                 BentSpear(x, y),
-                ChippedMace(x, y,),
-                OldWhip(x, y,),
-                CrackedAxe(x, y,),
+                ChippedMace(x, y, ),
+                OldWhip(x, y, ),
+                CrackedAxe(x, y, ),
                 HealingPotion(x, y, cast_heal),
                 LesserHealingPotion(x, y, cast_lesser_heal),
                 LightningScroll(x, y, cast_lightning),
                 ConfuseScroll(x, y, cast_confuse),
-                FireballScroll(x, y, cast_fireball)
+                FireballScroll(x, y, cast_fireball),
+                RedMail(x, y),
+                RoughTunic(x, y)
                 ])
 
             objects.append(item)
@@ -541,7 +543,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, xp=50, att=3, wis=2, gold=200, death_function=player_death)
 objects.append(player)
 wep = random.choice([
     RustySword(player.x, player.y),

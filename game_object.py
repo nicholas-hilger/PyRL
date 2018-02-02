@@ -296,6 +296,23 @@ class Item(GameObject):
                 player.pierce = self.pierce
                 player.blunt = self.blunt
                 player.magic = self.magic
+            if self.type == 'chest':
+                if player.chest is not None:
+                    temp_chest = player.chest
+                    player.defense -= temp_chest.defense
+                    player.chest = self
+                    inventory.append(temp_chest)
+
+                if len(inventory) > 0:
+                    inventory.remove(self)
+                player.chest = self
+                player.cut_weak = self.cut_weak
+                player.blunt_weak = self.blunt_weak
+                player.pierce_weak = self.pierce_weak
+                player.magic_weak = self.magic_weak
+                player.defense += self.defense
+                player.color = self.color
+
 
             message(player.name + ' equips the ' + self.name + '.', colors.magenta)
 
@@ -329,7 +346,8 @@ class FireballScroll(Item):
 
 
 class Equipment(Item):
-    def __init__(self, x, y, char, name, color, blocks=False, ai=None, fighter=None, item=1, cut=0, blunt=0, pierce=0, magic=0, ranged=0, use_function=None, type=None):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, fighter=None, item=1, cut=0, blunt=0, pierce=0, magic=0, ranged=0,
+                 defense=0, cut_weak=1, blunt_weak=1, magic_weak=1, pierce_weak=1, use_function=None, type=None):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=False, ai=None, fighter=None, item=1, use_function=use_function)
 
@@ -338,6 +356,13 @@ class Equipment(Item):
         self.blunt = blunt
         self.magic = magic
         self.ranged = ranged
+        self.defense = defense
+        self.cut_weak = cut_weak
+        self.blunt_weak = blunt_weak
+        self.pierce_weak = pierce_weak
+        self.magic_weak = magic_weak
+        self.defense = defense
+
         self.use_function = use_function
         self.type = type
 
@@ -371,3 +396,13 @@ class OldWhip(Equipment):
 class CrackedAxe(Equipment):
     def __init__(self, x, y):
         super().__init__(x=x, y=y, char='/', name='Cracked Axe', color=colors.red, fighter=None, ai=None, blocks=False, use_function=None, cut=5, blunt=3, type='weapon')
+
+
+class RedMail(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Red Mail', color=colors.dark_crimson, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, blunt_weak=0.5, magic_weak=0.5, pierce_weak=0.5, defense=1, type='chest')
+
+
+class RoughTunic(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Rough Tunic', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, defense=2, type='chest')
