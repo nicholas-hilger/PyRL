@@ -302,6 +302,7 @@ class Item(GameObject):
         else:
             message(self.name + ' can\'t be equipped.', colors.red)
 
+
 class LesserHealingPotion(Item):
     def __init__(self, x, y, use_function=None):
         super().__init__(x=x, y=y, char='!', name='Lesser Healing Potion', color=colors.lighter_violet, ai=None, blocks=False, use_function=use_function)

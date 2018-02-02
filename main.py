@@ -266,6 +266,33 @@ def render_all():
     panel.draw_str(8, 7, "Wis:" + str(player.wis), fg=colors.white)
     panel.draw_str(15, 7, 'Def:' + str(player.defense), fg=colors.white)
 
+    if player.wep is not None:
+        wep_show = player.wep.name
+    else:
+        wep_show = 'None'
+    if player.shield is not None:
+        shield_show = player.shield.name
+    else:
+        shield_show = 'None'
+    if player.chest is not None:
+        chest_show = player.chest.name
+    else:
+        chest_show = 'None'
+    if player.pants is not None:
+        pants_show = player.wep.name
+    else:
+        pants_show = 'None'
+    if player.helm is not None:
+        helm_show = player.wep.name
+    else:
+        helm_show = 'None'
+
+    panel.draw_str(23, 2, "Weapon: " + str(wep_show), fg=colors.white)
+    panel.draw_str(23, 3, 'Shield: ' + str(shield_show), fg=colors.white)
+    panel.draw_str(23, 4, 'Helmet: ' + str(helm_show), fg=colors.white)
+    panel.draw_str(23, 5, 'Chest:  ' + str(chest_show), fg=colors.white)
+    panel.draw_str(23, 6, 'Pants:  ' + str(pants_show), fg=colors.white)
+
     panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
 
     #blit the contents of panel to the root console
