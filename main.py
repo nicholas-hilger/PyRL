@@ -268,30 +268,41 @@ def render_all():
 
     if player.wep is not None:
         wep_show = player.wep.name
+        wep_color = player.wep.color
     else:
         wep_show = 'None'
+        wep_color = colors.dark_gray
     if player.shield is not None:
         shield_show = player.shield.name
+        shield_color = player.shield.color
     else:
         shield_show = 'None'
+        shield_color = colors.dark_gray
     if player.chest is not None:
         chest_show = player.chest.name
+        chest_color = player.chest.color
     else:
         chest_show = 'None'
+        chest_color = colors.dark_gray
     if player.pants is not None:
-        pants_show = player.wep.name
+        pants_show = player.pants.name
+        pants_color = player.pants.color
     else:
         pants_show = 'None'
+        pants_color = colors.dark_gray
     if player.helm is not None:
-        helm_show = player.wep.name
+        helm_show = player.helm.name
+        helm_color = player.helm.color
     else:
         helm_show = 'None'
+        helm_color = colors.dark_gray
 
-    panel.draw_str(23, 2, "Weapon: " + str(wep_show), fg=colors.white)
-    panel.draw_str(23, 3, 'Shield: ' + str(shield_show), fg=colors.white)
-    panel.draw_str(23, 4, 'Helmet: ' + str(helm_show), fg=colors.white)
-    panel.draw_str(23, 5, 'Chest:  ' + str(chest_show), fg=colors.white)
-    panel.draw_str(23, 6, 'Pants:  ' + str(pants_show), fg=colors.white)
+
+    panel.draw_str(23, 2, "Weapon: " + str(wep_show), fg=wep_color)
+    panel.draw_str(23, 3, 'Shield: ' + str(shield_show), fg=shield_color)
+    panel.draw_str(23, 4, 'Helmet: ' + str(helm_show), fg=helm_color)
+    panel.draw_str(23, 5, 'Chest:  ' + str(chest_show), fg=chest_color)
+    panel.draw_str(23, 6, 'Pants:  ' + str(pants_show), fg=pants_color)
 
     panel.draw_str(MSG_X, 0, get_names_under_mouse(), bg=None, fg=colors.light_gray)
 
@@ -326,6 +337,7 @@ def place_objects(room):
                 BentSpear(x, y),
                 ChippedMace(x, y,),
                 OldWhip(x, y,),
+                CrackedAxe(x, y,),
                 HealingPotion(x, y, cast_heal),
                 LesserHealingPotion(x, y, cast_lesser_heal),
                 LightningScroll(x, y, cast_lightning),
@@ -528,8 +540,9 @@ objects.append(player)
 wep = random.choice([
     RustySword(player.x, player.y),
     BentSpear(player.x, player.y),
-    ChippedMace(player.x, player.y,),
-    OldWhip(player.x, player.y,),
+    ChippedMace(player.x, player.y),
+    OldWhip(player.x, player.y),
+    CrackedAxe(player.x, player.y)
 ])
 wep.equip(player, message, inventory)
 player.wep = wep

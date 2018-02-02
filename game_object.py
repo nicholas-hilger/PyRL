@@ -350,19 +350,24 @@ class Equipment(Item):
 
 class RustySword(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='/', name='Rusty Sword', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, cut=6, type='weapon')
+        super().__init__(x=x, y=y, char='/', name='Rusty Sword', color=colors.orange, fighter=None, ai=None, blocks=False, use_function=None, cut=8, type='weapon')
 
 
 class ChippedMace(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='/', name='Chipped Mace', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, blunt=5, type='weapon')
+        super().__init__(x=x, y=y, char='/', name='Chipped Mace', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, blunt=7, type='weapon')
 
 
 class BentSpear(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='/', name='Bent Spear', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, pierce=8, type='weapon')
+        super().__init__(x=x, y=y, char='/', name='Bent Spear', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, pierce=8, type='weapon')
 
 
 class OldWhip(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='/', name='Old Whip', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, cut=5, magic=2, type='weapon')
+        super().__init__(x=x, y=y, char='/', name='Old Whip', color=colors.dark_sepia, fighter=None, ai=None, blocks=False, use_function=None, cut=5, magic=2, type='weapon')
+
+
+class CrackedAxe(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Cracked Axe', color=colors.red, fighter=None, ai=None, blocks=False, use_function=None, cut=5, blunt=3, type='weapon')
