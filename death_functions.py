@@ -19,4 +19,4 @@ def player_death(player, message):
 
     #turn the player into a corpse
     player.char = '%'
-    player.color = colors.dark_red
+    player.color = colors.darker_red

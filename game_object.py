@@ -112,7 +112,7 @@ class Fighter(GameObject):
 
     def __init__(self, x, y, char, name, color, hp, blocks=False, ai=None, defense=0, cut=0, blunt=0, pierce=0, magic=0,
                  cut_weak=1, blunt_weak=1, pierce_weak=1, magic_weak=1, att=0, wis=0, xp=0, gold=0, spd=1,
-                 death_function=None, lvl=1, creature=1):
+                 death_function=None, lvl=1, creature=1, wep=None, helm=None, chest=None, pants=None, shield=None):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks, creature=creature)
 
@@ -136,6 +136,12 @@ class Fighter(GameObject):
         self.gold = gold
         self.spd = spd
         self.creature = creature
+        self.wep = wep
+        self.helm = helm
+        self.chest = chest
+        self.pants = pants
+        self.shield = shield
+
         if ai is not None:
             self.ai = ai()
             self.ai.owner = self
@@ -275,6 +281,22 @@ class Item(GameObject):
             if self.use_function() != 'cancelled':
                 inventory.remove(self) #destroy after use, unless it was cancelled for some reason
 
+    def equip(self, player, message, inventory):
+        if self.type == 'weapon':
+            if player.wep is not None:
+                temp_wep = player.wep
+                player.wep = self
+                inventory.append(temp_wep)
+
+            inventory.remove(self)
+            player.wep = self
+            player.cut = self.cut
+            player.pierce = self.pierce
+            player.blunt = self.blunt
+            player.magic = self.magic
+
+        message(player.name + ' equips the ' + self.name + '.')
+
 
 class LesserHealingPotion(Item):
     def __init__(self, x, y, use_function=None):
@@ -299,3 +321,43 @@ class ConfuseScroll(Item):
 class FireballScroll(Item):
     def __init__(self, x, y, use_function=None):
         super().__init__(x=x, y=y, char='?', name='Scroll of Fireball', color=SCROLL_COLOR, ai=None, blocks=False, use_function=use_function)
+
+
+class Equipment(Item):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, fighter=None, item=1, cut=0, blunt=0, pierce=0, magic=0, ranged=0, use_function=None, type=None):
+
+        super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=False, ai=None, fighter=None, item=1, use_function=use_function)
+
+        self.cut = cut
+        self.pierce = pierce
+        self.blunt = blunt
+        self.magic = magic
+        self.ranged = ranged
+        self.use_function = use_function
+        self.type = type
+
+        if ai is not None:
+            self.ai = ai()
+            self.ai.owner = self
+        else:
+            self.ai = None
+
+
+class RustySword(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Rusty Sword', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, cut=6, type='weapon')
+
+
+class ChippedMace(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Chipped Mace', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, blunt=4, type='weapon')
+
+
+class BentSpear(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Bent Spear', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, pierce=8, type='weapon')
+
+
+class OldWhip(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Old Whip', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, cut=5, magic=2, type='weapon')

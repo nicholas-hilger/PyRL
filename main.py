@@ -83,7 +83,10 @@ def handle_keys():
                 chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
                 if chosen_item is not None:
                     chosen_item.use(inventory, message)
-                    return 'playing'
+            if user_input.text == 'e':
+                chosen_equip = inventory_menu('EQUIP: Press a key next to an equipment item to use it, or anything else to cancel.')
+                if chosen_equip is not None:
+                    chosen_equip.equip(player, message, inventory)
 
             return 'didnt-take-turn'
 
@@ -292,6 +295,10 @@ def place_objects(room):
 
         if not GameObject.is_blocked(x, y, my_map, objects):
             item = random.choice([
+                RustySword(x, y),
+                BentSpear(x, y),
+                ChippedMace(x, y,),
+                OldWhip(x, y,),
                 HealingPotion(x, y, cast_heal),
                 LesserHealingPotion(x, y, cast_lesser_heal),
                 LightningScroll(x, y, cast_lightning),
@@ -475,7 +482,7 @@ def target_tile(max_range=None):
 #######################
 
 
-tdl.set_font('Fonts/terminal10x10_gs_tc.png', greyscale=True, altLayout=True)
+tdl.set_font('Fonts/dejavu_wide16x16_gs_tc.png', greyscale=True, altLayout=True)
 root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
@@ -489,7 +496,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, blunt=5, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, blunt = 99, hp=145, defense=1, xp=50, att=3, wis=2, gold=200, death_function=player_death)
 objects.append(player)
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
