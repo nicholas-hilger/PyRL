@@ -14,6 +14,7 @@ mouse_coord = (0, 0)
 
 turns = 0
 last_combat = 0
+inv_open = 0
 
 global fov_recompute
 fov_recompute = True
@@ -25,6 +26,7 @@ def handle_keys():
     global mouse_coord
     global turns
     global last_combat
+    global inv_open
 
     keypress = False
     for event in tdl.event.get():
@@ -79,15 +81,18 @@ def handle_keys():
                     if obj.x == player.x and obj.y == player.y and obj.item:
                         obj.pick_up(inventory, message, objects)
                         break
-            if user_input.text == "i":
+            elif user_input.text == "i" and not inv_open:
+                inv_open = 1
                 chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
                 if chosen_item is not None:
                     chosen_item.use(inventory, message)
-            if user_input.text == 'e':
-                chosen_equip = inventory_menu('EQUIP: Press a key next to an equipment item to use it, or anything else to cancel.')
+            elif user_input.text == 'e' and not inv_open:
+                inv_open = 1
+                chosen_equip = inventory_menu('EQUIP: Press a key next to a piece of equipment to equip it, or anything else to cancel.')
                 if chosen_equip is not None:
                     chosen_equip.equip(player, message, inventory)
 
+            inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
 
         '''elif user_input.key == 'ENTER' and user_input.alt:
