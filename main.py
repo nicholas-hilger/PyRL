@@ -39,6 +39,13 @@ def handle_keys():
     if not keypress:
         return 'didnt-take-turn'
 
+    if game_state == 'playing':
+        if user_input.key == 'ESCAPE':
+            return 'exit'
+        if user_input.key == 'ENTER' and user_input.alt:
+            # Alt-enter toggles fullscreen
+            tdl.set_fullscreen(not tdl.get_fullscreen())
+
     #Movement keys, only if the player isn't paused
     if game_state == 'playing' and player.hp > 0:
         if user_input.key == 'UP' or user_input.key == 'KP8' or user_input.keychar == 'k':
@@ -73,8 +80,6 @@ def handle_keys():
             player.move_or_attack(1, -1, objects, message, my_map, player)
             fov_recompute = True
             turns += 1
-        elif user_input.key == 'ESCAPE':
-            return 'exit'
         else:
             if user_input.text == 'g':
                 for obj in objects:
@@ -94,10 +99,6 @@ def handle_keys():
 
             inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
-
-        '''elif user_input.key == 'ENTER' and user_input.alt:
-            #Alt-enter toggles fullscreen
-            tdl.set_fullscreen(not tdl.get_fullscreen())'''
 
 
 def get_names_under_mouse():
