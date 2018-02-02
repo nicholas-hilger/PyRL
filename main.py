@@ -496,8 +496,16 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, blunt = 99, hp=145, defense=1, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, defense=1, xp=50, att=3, wis=2, gold=200, death_function=player_death)
 objects.append(player)
+wep = random.choice([
+    RustySword(player.x, player.y),
+    BentSpear(player.x, player.y),
+    ChippedMace(player.x, player.y,),
+    OldWhip(player.x, player.y,),
+])
+wep.equip(player, message, inventory)
+player.wep = wep
 
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
 

@@ -282,21 +282,25 @@ class Item(GameObject):
                 inventory.remove(self) #destroy after use, unless it was cancelled for some reason
 
     def equip(self, player, message, inventory):
-        if self.type == 'weapon':
-            if player.wep is not None:
-                temp_wep = player.wep
+        if self.use_function is None:
+            if self.type == 'weapon':
+                if player.wep is not None:
+                    temp_wep = player.wep
+                    player.wep = self
+                    inventory.append(temp_wep)
+
+                if len(inventory) > 0:
+                    inventory.remove(self)
                 player.wep = self
-                inventory.append(temp_wep)
+                player.cut = self.cut
+                player.pierce = self.pierce
+                player.blunt = self.blunt
+                player.magic = self.magic
 
-            inventory.remove(self)
-            player.wep = self
-            player.cut = self.cut
-            player.pierce = self.pierce
-            player.blunt = self.blunt
-            player.magic = self.magic
+            message(player.name + ' equips the ' + self.name + '.', colors.magenta)
 
-        message(player.name + ' equips the ' + self.name + '.')
-
+        else:
+            message(self.name + ' can\'t be equipped.', colors.red)
 
 class LesserHealingPotion(Item):
     def __init__(self, x, y, use_function=None):
@@ -350,7 +354,7 @@ class RustySword(Equipment):
 
 class ChippedMace(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='/', name='Chipped Mace', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, blunt=4, type='weapon')
+        super().__init__(x=x, y=y, char='/', name='Chipped Mace', color=colors.silver, fighter=None, ai=None, blocks=False, use_function=None, blunt=5, type='weapon')
 
 
 class BentSpear(Equipment):
