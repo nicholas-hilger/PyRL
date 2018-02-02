@@ -84,7 +84,7 @@ def handle_keys():
             if user_input.text == 'g':
                 for obj in objects:
                     if obj.x == player.x and obj.y == player.y and obj.item:
-                        obj.pick_up(inventory, message, objects)
+                        obj.pick_up(inventory, message, objects, player)
                         break
             elif user_input.text == "i" and not inv_open:
                 inv_open = 1
@@ -350,7 +350,8 @@ def place_objects(room):
                 ConfuseScroll(x, y, cast_confuse),
                 FireballScroll(x, y, cast_fireball),
                 RedMail(x, y),
-                RoughTunic(x, y)
+                RoughTunic(x, y),
+                Gold(x, y)
                 ])
 
             objects.append(item)

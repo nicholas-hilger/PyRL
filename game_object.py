@@ -266,13 +266,19 @@ class Item(GameObject):
         else:
             self.ai = None
 
-    def pick_up(self, inventory, message, objects):
+    def pick_up(self, inventory, message, objects, player):
         if len(inventory) >= 26:
             message('Your inventory is full! You leave ' + self.name + ' behind.', colors.light_red)
         else:
-            inventory.append(self)
-            objects.remove(self)
-            message('You pick up the ' + self.name + '.', colors.green)
+            if self.name != 'Gold':
+                inventory.append(self)
+                objects.remove(self)
+                message('You pick up the ' + self.name + '.', colors.green)
+            else:
+                gain = random.randint(1, 25)
+                player.gold += gain
+                message('You pick up ' + str(gain) + ' gold.', colors.yellow)
+                objects.remove(self)
 
     def use(self, inventory, message):
         if self.use_function is None:
@@ -343,6 +349,11 @@ class ConfuseScroll(Item):
 class FireballScroll(Item):
     def __init__(self, x, y, use_function=None):
         super().__init__(x=x, y=y, char='?', name='Scroll of Fireball', color=SCROLL_COLOR, ai=None, blocks=False, use_function=use_function)
+
+
+class Gold(Item):
+    def __init__(self, x, y, use_function=None):
+        super().__init__(x=x, y=y, char='$', name='Gold', color=colors.yellow, ai=None, blocks=False, use_function=use_function)
 
 
 class Equipment(Item):
