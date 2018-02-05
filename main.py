@@ -88,14 +88,12 @@ def handle_keys():
                         break
             elif user_input.text == "i" and not inv_open:
                 inv_open = 1
-                chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use it, or anything else to cancel.')
+                chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use/equip it, or anything else to cancel.')
                 if chosen_item is not None:
-                    chosen_item.use(inventory, message)
-            elif user_input.text == 'e' and not inv_open:
-                inv_open = 1
-                chosen_equip = inventory_menu('EQUIP: Press a key next to a piece of equipment to equip it, or anything else to cancel.')
-                if chosen_equip is not None:
-                    chosen_equip.equip(player, message, inventory)
+                    if chosen_item.type == '':
+                        chosen_item.use(inventory, message)
+                    else:
+                        chosen_item.equip(player, message, inventory)
 
             inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
@@ -337,27 +335,7 @@ def place_objects(room):
         y = randint(room.y1 + 1, room.y2 - 1)
 
         if not GameObject.is_blocked(x, y, my_map, objects):
-            item = random.choice([
-                RustySword(x, y),
-                BentSpear(x, y),
-                ChippedMace(x, y, ),
-                OldWhip(x, y, ),
-                CrackedAxe(x, y, ),
-                HealingPotion(x, y, cast_heal),
-                LesserHealingPotion(x, y, cast_lesser_heal),
-                LightningScroll(x, y, cast_lightning),
-                ConfuseScroll(x, y, cast_confuse),
-                FireballScroll(x, y, cast_fireball),
-                RedMail(x, y),
-                Coat(x, y),
-                Trousers(x, y),
-                Gold(x, y),
-                PlankShield(x, y,),
-                Hat(x, y)
-                ])
-
-            objects.append(item)
-            item.send_to_back(objects)
+            place_item(x, y)
 
 
 def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
@@ -527,6 +505,49 @@ def target_tile(max_range=None):
         if clicked and mouse_coord in visible_tiles and (max_range is None or player.distance(x, y) <= max_range):
             return mouse_coord
 
+
+def place_item(x, y):
+
+    item_group = random.choice(['potion', 'armor', 'wep', 'gold', 'scroll'])
+
+    if item_group == 'potion':
+        item = random.choice([
+            HealingPotion(x, y, cast_heal),
+            LesserHealingPotion(x, y, cast_lesser_heal)
+        ])
+
+    elif item_group == 'armor':
+        item = random.choice([
+            RedMail(x, y),
+            Coat(x, y),
+            Trousers(x, y),
+            PlankShield(x, y, ),
+            Hat(x, y)
+        ])
+
+    elif item_group == 'wep':
+        item = random.choice([
+            RustySword(x, y),
+            BentSpear(x, y),
+            ChippedMace(x, y),
+            OldWhip(x, y),
+            CrackedAxe(x, y)
+        ])
+
+    elif item_group == 'gold':
+        item = Gold(x, y)
+
+    elif item_group == 'scroll':
+        item = random.choice([
+            LightningScroll(x, y, cast_lightning),
+            ConfuseScroll(x, y, cast_confuse),
+            FireballScroll(x, y, cast_fireball)
+        ])
+
+    objects.append(item)
+    item.send_to_back(objects)
+
+
 #######################
 #Init and Main Loop   #
 #######################
@@ -546,7 +567,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, xp=50, att=2, wis=2, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=180, xp=50, att=2, wis=2, death_function=player_death)
 objects.append(player)
 wep = random.choice([
     RustySword(player.x, player.y),

@@ -259,7 +259,7 @@ class LesserUndead(Fighter):
 
 
 class Item(GameObject):
-    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None, item=1, use_function=None):
+    def __init__(self, x, y, char, name, color, blocks=False, ai=None, hp=0, att=0, wis=0, fighter=None, item=1, use_function=None, type=''):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks, item=1)
 
@@ -269,6 +269,7 @@ class Item(GameObject):
         self.fighter = fighter
         self.item = item
         self.use_function = use_function
+        self.type = type
 
         if ai is not None:
             self.ai = ai()
@@ -461,7 +462,7 @@ class RedMail(Equipment):
 
 class Coat(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='[', name='Coat', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.75, defense=2, type='chest')
+        super().__init__(x=x, y=y, char='[', name='Coat', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.75, type='chest')
 
 
 class Trousers(Equipment):
