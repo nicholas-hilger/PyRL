@@ -303,7 +303,6 @@ def render_all():
         helm_show = 'None'
         helm_color = colors.dark_gray
 
-
     panel.draw_str(23, 2, "Weapon: " + str(wep_show), fg=wep_color)
     panel.draw_str(23, 3, 'Shield: ' + str(shield_show), fg=shield_color)
     panel.draw_str(23, 4, 'Helmet: ' + str(helm_show), fg=helm_color)
@@ -350,8 +349,11 @@ def place_objects(room):
                 ConfuseScroll(x, y, cast_confuse),
                 FireballScroll(x, y, cast_fireball),
                 RedMail(x, y),
-                RoughTunic(x, y),
-                Gold(x, y)
+                Coat(x, y),
+                Trousers(x, y),
+                Gold(x, y),
+                PlankShield(x, y,),
+                Hat(x, y)
                 ])
 
             objects.append(item)
@@ -544,7 +546,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, xp=50, att=3, wis=2, gold=200, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=145, xp=50, att=2, wis=2, death_function=player_death)
 objects.append(player)
 wep = random.choice([
     RustySword(player.x, player.y),

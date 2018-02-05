@@ -162,6 +162,7 @@ class Fighter(GameObject):
 
     def attack(self, target, message, player, objects):
             damage = 0
+            blocked = 0
             if self.blunt > 0:
                 damage += int((self.att + self.blunt) * target.blunt_weak)
             if self.cut > 0:
@@ -186,11 +187,20 @@ class Fighter(GameObject):
             elif damage_type == self.magic:
                 damage_adj = ' blasts '
 
-            if damage > 0:
+            if target == player:
+                if target.shield is not None:
+                    block_chance = random.randint(0, 100)
+                    if block_chance < target.shield.block:
+                        blocked = 1
+
+            if damage > 0 and not blocked:
                 message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
                 target.take_damage(damage, message, player, objects)
             else:
-                message(self.name + ' tries to attack ' + target.name + ', but whiffs!')
+                if not blocked:
+                    message(self.name + ' tries to attack ' + target.name + ', but whiffs!')
+                else:
+                    message(self.name + ' tries to attack ' + target.name + ', but is blocked!')
 
     def check_xp(self, player, message):
         if self.xp >= self.max_xp:
@@ -215,8 +225,8 @@ class Fighter(GameObject):
         if self.att > 99:
             self.att = 99
 
-        if self.defense < 1:
-            self.defense = 1
+        if self.defense < 0:
+            self.defense = 0
         if self.defense > 99:
             self.defense = 99
 
@@ -233,7 +243,7 @@ class Fighter(GameObject):
 class Goblin(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='g', name='Goblin', color=colors.darker_green, hp=27, blocks=True, ai=BasicMonster, defense=1,
-                         cut=7, magic_weak=1.5, cut_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1, creature=1)
+                         cut=5, magic_weak=1.5, cut_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1, creature=1)
 
 
 class Slug(Fighter):
@@ -244,8 +254,8 @@ class Slug(Fighter):
 
 class LesserUndead(Fighter):
     def __init__(self, x, y):
-        super().__init__(x, y, char='u', name='Lesser Undead', color=colors.gray, hp=15, blocks=True, ai=BasicMonster, defense=0,
-                         pierce=5, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1, creature=1)
+        super().__init__(x, y, char='u', name='Lesser Ghoul', color=colors.gray, hp=15, blocks=True, ai=BasicMonster, defense=0,
+                         pierce=4, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1, creature=1)
 
 
 class Item(GameObject):
@@ -302,7 +312,8 @@ class Item(GameObject):
                 player.pierce = self.pierce
                 player.blunt = self.blunt
                 player.magic = self.magic
-            if self.type == 'chest':
+
+            elif self.type == 'chest':
                 if player.chest is not None:
                     temp_chest = player.chest
                     player.defense -= temp_chest.defense
@@ -319,6 +330,39 @@ class Item(GameObject):
                 player.defense += self.defense
                 player.color = self.color
 
+            elif self.type == 'pants':
+                if player.pants is not None:
+                    temp_pants = player.pants
+                    player.pants = self
+                    inventory.append(temp_pants)
+                    player.defense -= temp_pants.defense
+
+                if len(inventory) > 0:
+                    inventory.remove(self)
+                player.pants = self
+                player.defense += self.defense
+
+            elif self.type == 'helm':
+                if player.helm is not None:
+                    temp_helm = player.helm
+                    player.helm = self
+                    inventory.append(temp_helm)
+                    player.defense -= temp_helm.defense
+
+                if len(inventory) > 0:
+                    inventory.remove(self)
+                player.helm = self
+                player.defense += self.defense
+
+            elif self.type == 'shield':
+                if player.shield is not None:
+                    temp_shield = player.shield
+                    player.shield = self
+                    inventory.append(temp_shield)
+
+                if len(inventory) > 0:
+                    inventory.remove(self)
+                player.shield = self
 
             message(player.name + ' equips the ' + self.name + '.', colors.magenta)
 
@@ -358,7 +402,7 @@ class Gold(Item):
 
 class Equipment(Item):
     def __init__(self, x, y, char, name, color, blocks=False, ai=None, fighter=None, item=1, cut=0, blunt=0, pierce=0, magic=0, ranged=0,
-                 defense=0, cut_weak=1, blunt_weak=1, magic_weak=1, pierce_weak=1, use_function=None, type=None):
+                 defense=0, cut_weak=1, blunt_weak=1, magic_weak=1, pierce_weak=1, use_function=None, type=None, block=0):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=False, ai=None, fighter=None, item=1, use_function=use_function)
 
@@ -373,6 +417,7 @@ class Equipment(Item):
         self.pierce_weak = pierce_weak
         self.magic_weak = magic_weak
         self.defense = defense
+        self.block = block
 
         self.use_function = use_function
         self.type = type
@@ -414,6 +459,21 @@ class RedMail(Equipment):
         super().__init__(x=x, y=y, char='[', name='Red Mail', color=colors.dark_crimson, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, blunt_weak=0.5, magic_weak=0.5, pierce_weak=0.5, defense=1, type='chest')
 
 
-class RoughTunic(Equipment):
+class Coat(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char='[', name='Rough Tunic', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, defense=2, type='chest')
+        super().__init__(x=x, y=y, char='[', name='Coat', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.75, defense=2, type='chest')
+
+
+class Trousers(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Trousers', color=colors.lighter_sepia, fighter=None, ai=None, blocks=False, use_function=None, defense=1, type='pants')
+
+
+class Hat(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Hat', color=colors.dark_sepia, fighter=None, ai=None, blocks=False, use_function=None, defense=1, type='helm')
+
+
+class PlankShield(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char=']', name='Plank Shield', color=colors.light_sepia, fighter=None, ai=None, blocks=False, use_function=None, block=30, type='shield')
