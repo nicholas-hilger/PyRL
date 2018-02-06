@@ -18,6 +18,19 @@ class BasicMonster:
                 monster.attack(player, message, player, objects)
 
 
+class BasicRangedMonster:
+    # AI for a basic monster
+    def take_turn(self, visible_tiles, player, turns, message, my_map, objects):
+        # if you can see it, it can see you
+        monster = self.owner
+        if (monster.x, monster.y) in visible_tiles:
+            if monster.distance_to(player) >= 6:
+                monster.move_towards(player.x, player.y, my_map, objects)
+
+            elif player.hp > 0 and turns % monster.spd == 0:
+                monster.attack(player, message, player, objects)
+
+
 class ConfusedMonster:
     def __init__(self, old_ai, message, num_turns=CONFUSE_NUM_TURNS):
         self.old_ai = old_ai
@@ -33,6 +46,7 @@ class ConfusedMonster:
         else:
             self.owner.ai = self.old_ai
             self.message('The ' + self.owner.name + ' is no longer confused!', colors.red)
+
 
 class GameObject:
     # A generic object. Always represented by a character on screen.
@@ -252,10 +266,16 @@ class Slug(Fighter):
                          blunt=4, pierce_weak=1.5, xp=5, gold=28, spd=2, death_function=monster_death, lvl=1, creature=1)
 
 
-class LesserUndead(Fighter):
+class LesserGhoul(Fighter):
     def __init__(self, x, y):
         super().__init__(x, y, char='u', name='Lesser Ghoul', color=colors.gray, hp=15, blocks=True, ai=BasicMonster, defense=0,
                          pierce=4, pierce_weak=0.5, cut_weak=0.5, blunt_weak=2, xp=7, gold=20, spd=1, death_function=monster_death, lvl=1, creature=1)
+
+
+class Imp(Fighter):
+    def __init__(self, x, y):
+        super().__init__(x, y, char='i', name='Imp', color=colors.lighter_red, hp=7, blocks=True, ai=BasicRangedMonster, defense=0,
+                         magic=2, pierce=1, magic_weak=0, blunt_weak=2, pierce_weak=2, cut_weak=2,  xp=9, gold=20, spd=2, death_function=monster_death, lvl=1, creature=1)
 
 
 class Item(GameObject):
@@ -484,4 +504,4 @@ class Hat(Equipment):
 
 class PlankShield(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char=']', name='Plank Shield', color=colors.light_sepia, fighter=None, ai=None, blocks=False, use_function=None, block=30, type='shield')
+        super().__init__(x=x, y=y, char=']', name='Plank Shield', color=colors.light_sepia, fighter=None, ai=None, blocks=False, use_function=None, block=15, type='shield')

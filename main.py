@@ -337,7 +337,8 @@ def place_objects(room):
             monster = random.choice([
                 Goblin,
                 Slug,
-                LesserUndead
+                LesserGhoul,
+                Imp
             ])
             monster_instance = monster(x, y)
             objects.append(monster_instance)
