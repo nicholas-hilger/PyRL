@@ -298,6 +298,13 @@ class Item(GameObject):
             if self.use_function() != 'cancelled':
                 inv.remove(self) #destroy after use, unless it was cancelled for some reason
 
+    def drop(self, inventory, objects, message, player):
+        objects.append(self)
+        inventory.remove(self)
+        self.x = player.x
+        self.y = player.y
+        message('You drop the ' + self.name + ".", colors.lighter_red)
+
     def equip(self, player, message, inventory):
         if self.use_function is None:
             if self.type == 'weapon':

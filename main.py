@@ -102,7 +102,11 @@ def handle_keys():
                 chosen_item = equips_menu("EQUIPMENT: Press a key next to an item to equip it, or anything else to cancel.")
                 if chosen_item is not None:
                     chosen_item.equip(player, message, inventory)
-
+            elif user_input.text == '4':
+                chosen_item = inventory_menu(
+                    "DROP: Press a key next to an item to drop it, or anything else to cancel.")
+                if chosen_item is not None:
+                    chosen_item.drop(inventory, objects, message, player)
                 inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
 
