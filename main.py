@@ -491,9 +491,10 @@ def cast_lightning():
 
 
 def cast_confuse():
-    monster = closest_monster(CONFUSE_RANGE)
+    message('Left-click an enemy to confuse it, or right-click to cancel.', colors.light_cyan)
+    monster = target_monster(CONFUSE_RANGE)
     if monster is None:
-        message('No enemy in range.', colors.red)
+        message('Cancelled.', colors.red)
         return 'cancelled'
 
     monster.old_ai = monster.ai
@@ -550,6 +551,17 @@ def target_tile(max_range=None):
         y = mouse_coord[1]
         if clicked and mouse_coord in visible_tiles and (max_range is None or player.distance(x, y) <= max_range):
             return mouse_coord
+
+
+def target_monster(max_range=None):
+    while True:
+        (x, y) = target_tile(max_range)
+        if x is None: #player cancelled
+            return None
+
+        for obj in objects:
+            if obj.x == x and obj.y == y and obj.blocks and obj != player:
+                return obj
 
 
 def place_item(x, y):
