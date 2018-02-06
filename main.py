@@ -98,6 +98,10 @@ def handle_keys():
                 chosen_item = consumables_menu("CONSUMABLES: Press a key next to an item to use it, or anything else to cancel.")
                 if chosen_item is not None:
                     chosen_item.use(inventory, message)
+            elif user_input.text == '3':
+                chosen_item = equips_menu("EQUIPMENT: Press a key next to an item to equip it, or anything else to cancel.")
+                if chosen_item is not None:
+                    chosen_item.equip(player, message, inventory)
 
                 inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
@@ -430,6 +434,25 @@ def consumables_menu(header):
     return consumables[index]
 
 
+def equips_menu(header):
+    equips.clear()
+
+    for i in inventory:
+        if i.type != '':
+            equips.append(i)
+
+    if len(equips) == 0:
+        options = ['You don\'t have any equipment']
+    else:
+        options = [item.name for item in equips]
+
+    index = menu(header, options, INVENTORY_WIDTH)
+
+    if index is None or len(equips) == 0:
+        return None
+    return equips[index]
+
+
 def cast_heal():
     if player.hp == player.max_hp:
         message('You\'re already at full health!', colors.light_red)
@@ -463,8 +486,8 @@ def cast_lightning():
         message('No enemy in range.', colors.red)
         return 'cancelled'
 
-    message('The lightning bolt strikes ' + monster.name + ' for ' + str(LIGHTNING_DAMAGE+player.wis+player.magic) + ' damage.', colors.dark_yellow)
-    monster.take_damage((LIGHTNING_DAMAGE+player.wis+player.magic), message, player, objects)
+    message('The lightning bolt strikes ' + monster.name + ' for ' + str(int(LIGHTNING_DAMAGE+(player.wis*monster.magic_weak))) + ' damage.', colors.dark_yellow)
+    monster.take_damage(int(LIGHTNING_DAMAGE+(player.wis*monster.magic_weak)), message, player, objects)
 
 
 def cast_confuse():
@@ -489,8 +512,8 @@ def cast_fireball():
 
     for obj in objects:
         if obj.distance(x, y) <= FIREBALL_RADIUS and obj.blocks:
-            message('The ' + obj.name + ' gets burned for ' + str(FIREBALL_DAMAGE+player.wis) + ' damage!', colors.orange)
-            obj.take_damage(FIREBALL_DAMAGE+player.wis, message, player, objects)
+            message('The ' + obj.name + ' gets burned for ' + str(int(FIREBALL_DAMAGE+(player.wis*obj.magic_weak))) + ' damage!', colors.orange)
+            obj.take_damage(int(FIREBALL_DAMAGE+(player.wis*obj.magic_weak)), message, player, objects)
 
 
 def closest_monster(max_range):
@@ -584,6 +607,7 @@ panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 objects = []
 inventory = []
 consumables = []
+equips = []
 
 music_play = 1
 
