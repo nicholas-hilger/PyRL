@@ -291,12 +291,12 @@ class Item(GameObject):
                 message('You pick up ' + str(gain) + ' gold.', colors.yellow)
                 objects.remove(self)
 
-    def use(self, inventory, message):
+    def use(self, inv, message):
         if self.use_function is None:
             message('The ' + self.name + ' cannot be used.', colors.light_red)
         else:
             if self.use_function() != 'cancelled':
-                inventory.remove(self) #destroy after use, unless it was cancelled for some reason
+                inv.remove(self) #destroy after use, unless it was cancelled for some reason
 
     def equip(self, player, message, inventory):
         if self.use_function is None:

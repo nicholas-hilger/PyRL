@@ -86,7 +86,7 @@ def handle_keys():
                     if obj.x == player.x and obj.y == player.y and obj.item:
                         obj.pick_up(inventory, message, objects, player)
                         break
-            elif user_input.text == "i" and not inv_open:
+            elif user_input.text == '1':
                 inv_open = 1
                 chosen_item = inventory_menu('INVENTORY: Press a key next to an item to use/equip it, or anything else to cancel.')
                 if chosen_item is not None:
@@ -94,8 +94,12 @@ def handle_keys():
                         chosen_item.use(inventory, message)
                     else:
                         chosen_item.equip(player, message, inventory)
+            elif user_input.text == '2':
+                chosen_item = consumables_menu("CONSUMABLES: Press a key next to an item to use it, or anything else to cancel.")
+                if chosen_item is not None:
+                    chosen_item.use(inventory, message)
 
-            inv_open = 0 #I'll figure this out later
+                inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
 
 
@@ -407,6 +411,25 @@ def inventory_menu(header):
     return inventory[index]
 
 
+def consumables_menu(header):
+    consumables.clear()
+
+    for i in inventory:
+        if i.type == '':
+            consumables.append(i)
+
+    if len(consumables) == 0:
+        options = ['You don\'t have any consumables']
+    else:
+        options = [item.name for item in consumables]
+
+    index = menu(header, options, INVENTORY_WIDTH)
+
+    if index is None or len(consumables) == 0:
+        return None
+    return consumables[index]
+
+
 def cast_heal():
     if player.hp == player.max_hp:
         message('You\'re already at full health!', colors.light_red)
@@ -560,6 +583,7 @@ panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
 objects = []
 inventory = []
+consumables = []
 
 music_play = 1
 
