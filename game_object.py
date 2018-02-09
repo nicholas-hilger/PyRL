@@ -482,6 +482,21 @@ class CrackedAxe(Equipment):
         super().__init__(x=x, y=y, char='/', name='Cracked Axe', color=colors.red, fighter=None, ai=None, blocks=False, use_function=None, cut=5, blunt=3, type='weapon')
 
 
+class Mournblade(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Mournblade', color=colors.purple, fighter=None, ai=None, blocks=False, use_function=None, cut=14, magic=8, type='weapon')
+
+
+class Trident(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Trident', color=colors.dark_yellow, fighter=None, ai=None, blocks=False, use_function=None, pierce=12, magic=3, type='weapon')
+
+
+class ChainWhip(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='/', name='Chain Whip', color=colors.gray, fighter=None, ai=None, blocks=False, use_function=None, cut=9, blunt=7, type='weapon')
+
+
 class RedMail(Equipment):
     def __init__(self, x, y):
         super().__init__(x=x, y=y, char='[', name='Red Mail', color=colors.dark_crimson, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, blunt_weak=0.5, magic_weak=0.5, pierce_weak=0.5, defense=1, type='chest')
@@ -492,9 +507,19 @@ class Coat(Equipment):
         super().__init__(x=x, y=y, char='[', name='Coat', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.75, type='chest')
 
 
+class LeatherVest(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Leather Vest', color=colors.sepia, fighter=None, ai=None, blocks=False, use_function=None, cut_weak=0.5, defense=1, type='chest')
+
+
 class Trousers(Equipment):
     def __init__(self, x, y):
         super().__init__(x=x, y=y, char='[', name='Trousers', color=colors.lighter_sepia, fighter=None, ai=None, blocks=False, use_function=None, defense=1, type='pants')
+
+
+class PlatedJeans(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Plated Jeans', color=colors.light_blue, fighter=None, ai=None, blocks=False, use_function=None, defense=2, type='pants')
 
 
 class Hat(Equipment):
@@ -502,6 +527,16 @@ class Hat(Equipment):
         super().__init__(x=x, y=y, char='[', name='Hat', color=colors.dark_sepia, fighter=None, ai=None, blocks=False, use_function=None, defense=1, type='helm')
 
 
+class Bucket(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char='[', name='Bucket', color=colors.dark_gray, fighter=None, ai=None, blocks=False, use_function=None, defense=2, type='helm')
+
+
 class PlankShield(Equipment):
     def __init__(self, x, y):
-        super().__init__(x=x, y=y, char=']', name='Plank Shield', color=colors.light_sepia, fighter=None, ai=None, blocks=False, use_function=None, block=15, type='shield')
+        super().__init__(x=x, y=y, char=']', name='Plank Shield', color=colors.light_sepia, fighter=None, ai=None, blocks=False, use_function=None, block=5, type='shield')
+
+
+class PotLid(Equipment):
+    def __init__(self, x, y):
+        super().__init__(x=x, y=y, char=']', name='Pot Lid', color=colors.gray, fighter=None, ai=None, blocks=False, use_function=None, block=10, type='shield')

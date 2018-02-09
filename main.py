@@ -585,7 +585,11 @@ def place_item(x, y):
             Coat(x, y),
             Trousers(x, y),
             PlankShield(x, y, ),
-            Hat(x, y)
+            Hat(x, y),
+            Bucket(x, y),
+            PotLid(x, y),
+            LeatherVest(x, y),
+            PlatedJeans(x, y)
         ])
 
     elif item_group == 'wep':
@@ -594,7 +598,10 @@ def place_item(x, y):
             BentSpear(x, y),
             ChippedMace(x, y),
             OldWhip(x, y),
-            CrackedAxe(x, y)
+            CrackedAxe(x, y),
+            Trident(x, y),
+            Mournblade(x, y),
+            ChainWhip(x, y)
         ])
 
     elif item_group == 'gold':
