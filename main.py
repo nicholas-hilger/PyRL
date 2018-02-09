@@ -42,9 +42,9 @@ def handle_keys():
     if game_state == 'playing':
         if user_input.key == 'ESCAPE':
             return 'exit'
-        if user_input.key == 'ENTER' and user_input.alt:
+        '''if user_input.key == 'ENTER' and user_input.alt:
             # Alt-enter toggles fullscreen
-            tdl.set_fullscreen(not tdl.get_fullscreen())
+            tdl.set_fullscreen(not tdl.get_fullscreen())'''
 
     #Movement keys, only if the player isn't paused
     if game_state == 'playing' and player.hp > 0:
