@@ -668,6 +668,8 @@ wep = random.choice([
 wep.equip(player, message, inventory)
 player.wep = wep
 
+game_msgs.clear()
+
 message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
 
 make_map()
