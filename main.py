@@ -16,6 +16,8 @@ turns = 0
 last_combat = 0
 inv_open = 0
 
+
+
 global fov_recompute
 fov_recompute = True
 
@@ -571,48 +573,63 @@ def target_monster(max_range=None):
 
 def place_item(x, y):
 
+    tier_1_weps = [
+        RustySword(x, y),
+        BentSpear(x, y),
+        ChippedMace(x, y),
+        OldWhip(x, y),
+        CrackedAxe(x, y)
+    ]
+
+    tier_1_armor = [
+        Coat(x, y),
+        Trousers(x, y),
+        PlankShield(x, y, ),
+        Hat(x, y),
+        LeatherVest(x, y)
+    ]
+
+    tier_1_consumables = [
+        HealingPotion(x, y, cast_heal),
+        LesserHealingPotion(x, y, cast_lesser_heal)
+    ]
+
+    tier_1_scrolls = [
+        LightningScroll(x, y, cast_lightning),
+        ConfuseScroll(x, y, cast_confuse),
+        FireballScroll(x, y, cast_fireball)
+    ]
+
+    tier_2_weps = [
+        Trident(x, y),
+        Mournblade(x, y),
+        ChainWhip(x, y)
+    ]
+
+    tier_2_armor = [
+        RedMail(x, y),
+        Bucket(x, y),
+        PotLid(x, y),
+        LeatherVest(x, y),
+        PlatedJeans(x, y)
+    ]
+
     item_group = random.choice(['potion', 'armor', 'wep', 'gold', 'scroll'])
 
     if item_group == 'potion':
-        item = random.choice([
-            HealingPotion(x, y, cast_heal),
-            LesserHealingPotion(x, y, cast_lesser_heal)
-        ])
+        item = random.choice([random.choice(tier_1_consumables)])
 
     elif item_group == 'armor':
-        item = random.choice([
-            RedMail(x, y),
-            Coat(x, y),
-            Trousers(x, y),
-            PlankShield(x, y, ),
-            Hat(x, y),
-            Bucket(x, y),
-            PotLid(x, y),
-            LeatherVest(x, y),
-            PlatedJeans(x, y)
-        ])
+        item = random.choice([random.choice(tier_1_armor)])
 
     elif item_group == 'wep':
-        item = random.choice([
-            RustySword(x, y),
-            BentSpear(x, y),
-            ChippedMace(x, y),
-            OldWhip(x, y),
-            CrackedAxe(x, y),
-            Trident(x, y),
-            Mournblade(x, y),
-            ChainWhip(x, y)
-        ])
+        item = random.choice([random.choice(tier_1_weps)])
 
     elif item_group == 'gold':
         item = Gold(x, y)
 
     elif item_group == 'scroll':
-        item = random.choice([
-            LightningScroll(x, y, cast_lightning),
-            ConfuseScroll(x, y, cast_confuse),
-            FireballScroll(x, y, cast_fireball)
-        ])
+        item = random.choice([random.choice(tier_1_scrolls)])
 
     objects.append(item)
     item.send_to_back(objects)
