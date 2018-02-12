@@ -177,8 +177,13 @@ class Fighter(GameObject):
     def attack(self, target, message, player, objects):
             damage = 0
             blocked = 0
+            confuse_hit = 0
+
             if self.blunt > 0:
                 damage += int((self.att + self.blunt) * target.blunt_weak)
+                confuse_chance = random.randint(0, 100)
+                if confuse_chance < (15 + int(self.blunt/10)) and target != player:
+                    confuse_hit = 1
             if self.cut > 0:
                 damage += int((self.att + self.cut) * target.cut_weak)
             if self.pierce > 0:
@@ -209,6 +214,12 @@ class Fighter(GameObject):
 
             if damage > 0 and not blocked:
                 message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
+                if confuse_hit:
+                    message(target.name + ' got hit so hard, they\'re now confused!', colors.gray)
+                    target.old_ai = target.ai
+                    target.ai = ConfusedMonster(target.old_ai, message)
+                    target.ai.owner = target
+
                 target.take_damage(damage, message, player, objects)
             else:
                 if not blocked:

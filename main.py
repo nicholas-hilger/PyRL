@@ -658,13 +658,14 @@ my_map = [[Tile(True)
 
 player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=180, xp=50, att=2, wis=2, death_function=player_death)
 objects.append(player)
-wep = random.choice([
-    RustySword(player.x, player.y),
-    BentSpear(player.x, player.y),
-    ChippedMace(player.x, player.y),
-    OldWhip(player.x, player.y),
-    CrackedAxe(player.x, player.y)
-])
+# wep = random.choice([
+#     RustySword(player.x, player.y),
+#     BentSpear(player.x, player.y),
+#     ChippedMace(player.x, player.y),
+#     OldWhip(player.x, player.y),
+#     CrackedAxe(player.x, player.y)
+# ])
+wep = ChippedMace(player.x, player.y)
 wep.equip(player, message, inventory)
 player.wep = wep
 
