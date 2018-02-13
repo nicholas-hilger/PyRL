@@ -109,7 +109,6 @@ def handle_keys():
                     "DROP: Press a key next to an item to drop it, or anything else to cancel.")
                 if chosen_item is not None:
                     chosen_item.drop(inventory, objects, message, player)
-                inv_open = 0 #I'll figure this out later
             return 'didnt-take-turn'
 
 
@@ -330,6 +329,7 @@ def render_all():
 def place_objects(room):
     num_monsters = randint(0, MAX_ROOM_MONSTERS)
     num_items = randint(0, MAX_ROOM_ITEMS)
+    item_chance = randint(0, 100)
 
     for i in range(num_monsters):
         x = randint(room.x1 + 1, room.x2 - 1)
@@ -349,7 +349,7 @@ def place_objects(room):
         x = randint(room.x1 + 1, room.x2 - 1)
         y = randint(room.y1 + 1, room.y2 - 1)
 
-        if not GameObject.is_blocked(x, y, my_map, objects):
+        if not GameObject.is_blocked(x, y, my_map, objects) and item_chance < ITEM_CHANCE:
             place_item(x, y)
 
 
@@ -656,16 +656,15 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=180, xp=50, att=2, wis=2, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=150, xp=50, att=2, wis=2, death_function=player_death)
 objects.append(player)
-# wep = random.choice([
-#     RustySword(player.x, player.y),
-#     BentSpear(player.x, player.y),
-#     ChippedMace(player.x, player.y),
-#     OldWhip(player.x, player.y),
-#     CrackedAxe(player.x, player.y)
-# ])
-wep = ChippedMace(player.x, player.y)
+wep = random.choice([
+    RustySword(player.x, player.y),
+    BentSpear(player.x, player.y),
+    ChippedMace(player.x, player.y),
+    OldWhip(player.x, player.y),
+    CrackedAxe(player.x, player.y)
+])
 wep.equip(player, message, inventory)
 player.wep = wep
 

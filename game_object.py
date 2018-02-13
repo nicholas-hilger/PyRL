@@ -242,6 +242,9 @@ class Fighter(GameObject):
         if self.hp > self.max_hp:
             self.hp = self.max_hp
 
+        if self.max_hp > 9999:
+            self.max_hp = 9999
+
         if self.gold > 9999:
             self.gold = 9999
 
