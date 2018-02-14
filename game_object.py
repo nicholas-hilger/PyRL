@@ -198,13 +198,37 @@ class Fighter(GameObject):
             damage_adj = ' attacks '
 
             if damage_type == self.blunt:
-                damage_adj = ' smashes '
+                damage_adj = random.choice([
+                    ' smashes ',
+                    ' cracks ',
+                    ' whacks ',
+                    ' bludgeons ',
+                    ' smacks '
+                ])
             elif damage_type == self.pierce:
-                damage_adj = ' stabs '
+                damage_adj = random.choice([
+                    ' stabs ',
+                    ' skewers ',
+                    ' pierces ',
+                    ' jabs ',
+                    ' punctures '
+                ])
             elif damage_type == self.cut:
-                damage_adj = ' slashes '
+                damage_adj = random.choice([
+                    ' slashes ',
+                    ' cuts ',
+                    ' rips ',
+                    ' gouges ',
+                    ' dices '
+                ])
             elif damage_type == self.magic:
-                damage_adj = ' blasts '
+                damage_adj = random.choice([
+                    ' blasts ',
+                    ' zaps ',
+                    ' ensorceles ',
+                    ' chills ',
+                    ' burns '
+                ])
 
             if target == player:
                 if target.shield is not None:
