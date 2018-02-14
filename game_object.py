@@ -195,10 +195,10 @@ class Fighter(GameObject):
 
             damage_type = max(self.blunt, self.cut, self.pierce, self.magic)
 
-            damage_adj = ' attacks '
+            damage_verb = ' attacks '
 
             if damage_type == self.blunt:
-                damage_adj = random.choice([
+                damage_verb = random.choice([
                     ' smashes ',
                     ' cracks ',
                     ' whacks ',
@@ -206,7 +206,7 @@ class Fighter(GameObject):
                     ' smacks '
                 ])
             elif damage_type == self.pierce:
-                damage_adj = random.choice([
+                damage_verb = random.choice([
                     ' stabs ',
                     ' skewers ',
                     ' pierces ',
@@ -214,7 +214,7 @@ class Fighter(GameObject):
                     ' punctures '
                 ])
             elif damage_type == self.cut:
-                damage_adj = random.choice([
+                damage_verb = random.choice([
                     ' slashes ',
                     ' cuts ',
                     ' rips ',
@@ -222,7 +222,7 @@ class Fighter(GameObject):
                     ' dices '
                 ])
             elif damage_type == self.magic:
-                damage_adj = random.choice([
+                damage_verb = random.choice([
                     ' blasts ',
                     ' zaps ',
                     ' ensorceles ',
@@ -237,7 +237,7 @@ class Fighter(GameObject):
                         blocked = 1
 
             if damage > 0 and not blocked:
-                message(self.name + damage_adj + target.name + ' for ' + str(damage) + ' damage.')
+                message(self.name + damage_verb + target.name + ' for ' + str(damage) + ' damage.')
                 if confuse_hit:
                     message(target.name + ' got hit so hard, they\'re now confused!', colors.gray)
                     target.old_ai = target.ai
