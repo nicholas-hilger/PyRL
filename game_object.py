@@ -175,7 +175,7 @@ class Fighter(GameObject):
                     func(self, message)
 
     def attack(self, target, message, player, objects):
-            damage = 0
+            damage = (int(self.att/3))
             blocked = 0
             confuse_hit = 0
 
@@ -358,7 +358,8 @@ class Item(GameObject):
 
     def drop(self, inventory, objects, message, player):
         objects.append(self)
-        inventory.remove(self)
+        if self in inventory:
+            inventory.remove(self)
         self.x = player.x
         self.y = player.y
         message('You drop the ' + self.name + ".", colors.lighter_red)
@@ -430,10 +431,81 @@ class Item(GameObject):
                     inventory.remove(self)
                 player.shield = self
 
-            message(player.name + ' equips the ' + self.name + '.', colors.magenta)
+            message('You equip the ' + self.name + '.', colors.magenta)
 
         else:
             message(self.name + ' can\'t be equipped.', colors.red)
+
+    def unequip(self, player, message, inventory, objects):
+        if self.use_function is None:
+            name = self.name
+            message('You unequip the ' + name + '.', colors.magenta)
+            if self.type == 'weapon':
+                temp_wep = player.wep
+                player.wep = None
+
+                if len(inventory) < 26:
+                    inventory.append(temp_wep)
+                else:
+                    temp_wep.drop(inventory, objects, message, player)
+
+                player.cut = 0
+                player.pierce = 0
+                player.blunt = 0
+                player.magic = 0
+
+            elif self.type == 'chest':
+                temp_chest = player.chest
+                player.defense -= temp_chest.defense
+                player.chest = None
+
+                if len(inventory) < 26:
+                    inventory.append(temp_chest)
+
+                else:
+                    temp_chest.drop(inventory, objects, message, player)
+
+                player.cut_weak = 1
+                player.blunt_weak = 1
+                player.pierce_weak = 1
+                player.magic_weak = 1
+                player.color = colors.white
+
+            elif self.type == 'pants':
+                temp_pants = player.pants
+                player.pants = None
+                player.defense -= temp_pants.defense
+
+                if len(inventory) < 26:
+                    inventory.append(temp_pants)
+
+                else:
+                    temp_pants.drop(inventory, objects, message, player)
+
+            elif self.type == 'helm':
+                temp_helm = player.helm
+                player.helm = None
+                player.defense -= temp_helm.defense
+
+                if len(inventory) < 26:
+                    inventory.append(temp_helm)
+
+                else:
+                    temp_helm.drop(inventory, objects, message, player)
+
+                player.helm = None
+
+            elif self.type == 'shield':
+                temp_shield = player.shield
+                player.shield = None
+
+                if len(inventory) < 26:
+                    inventory.append(temp_shield)
+
+                else:
+                    temp_shield.drop(inventory, objects, message, player)
+
+                player.shield = None
 
 
 class LesserHealingPotion(Item):

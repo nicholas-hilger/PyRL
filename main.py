@@ -105,10 +105,13 @@ def handle_keys():
                 if chosen_item is not None:
                     chosen_item.equip(player, message, inventory)
             elif user_input.text == '4':
-                chosen_item = inventory_menu(
-                    "DROP: Press a key next to an item to drop it, or anything else to cancel.")
+                chosen_item = inventory_menu("DROP: Press a key next to an item to drop it, or anything else to cancel.")
                 if chosen_item is not None:
                     chosen_item.drop(inventory, objects, message, player)
+            elif user_input.text == '5':
+                chosen_item = unequip_menu("UNEQUIP: Press a key next to a piece of equipment to unequip it, or anything else to cancel.")
+                if chosen_item is not None:
+                    chosen_item.unequip(player, message, inventory, objects)
             return 'didnt-take-turn'
 
 
@@ -460,6 +463,32 @@ def equips_menu(header):
     return equips[index]
 
 
+def unequip_menu(header):
+    current_equips = []
+
+    if player.wep is not None:
+        current_equips.append(player.wep)
+    if player.shield is not None:
+        current_equips.append(player.shield)
+    if player.helm is not None:
+        current_equips.append(player.helm)
+    if player.chest is not None:
+        current_equips.append(player.chest)
+    if player.pants is not None:
+        current_equips.append(player.pants)
+
+    if len(current_equips) == 0:
+        options = ['You don\'t have anything equipped']
+    else:
+        options = [item.name for item in current_equips]
+
+    index = menu(header, options, INVENTORY_WIDTH)
+
+    if index is None or len(current_equips) == 0:
+        return None
+    return current_equips[index]
+
+
 def cast_heal():
     if player.hp == player.max_hp:
         message('You\'re already at full health!', colors.light_red)
@@ -656,7 +685,7 @@ my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
 
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=150, xp=50, att=2, wis=2, death_function=player_death)
+player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=150, xp=50, att=3, wis=2, death_function=player_death)
 objects.append(player)
 wep = random.choice([
     RustySword(player.x, player.y),
@@ -667,6 +696,11 @@ wep = random.choice([
 ])
 wep.equip(player, message, inventory)
 player.wep = wep
+
+heal_potion = HealingPotion(player.x, player.y, cast_heal)
+
+for i in range(26):
+    inventory.append(heal_potion)
 
 game_msgs.clear()
 
