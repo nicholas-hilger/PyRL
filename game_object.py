@@ -336,7 +336,7 @@ class Item(GameObject):
             self.ai = None
 
     def pick_up(self, inventory, message, objects, player):
-        if len(inventory) >= 26:
+        if len(inventory) >= 26 and self.name != "Gold":
             message('Your inventory is full! You leave ' + self.name + ' behind.', colors.light_red)
         else:
             if self.name != 'Gold':
