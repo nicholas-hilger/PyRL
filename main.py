@@ -10,6 +10,7 @@ from utils import *
 from game_object import *
 from death_functions import *
 from tcod import image_load
+import shelve
 
 mouse_coord = (0, 0)
 
@@ -733,7 +734,7 @@ def play_game():
         player_action = handle_keys()
         if player_action == 'exit':
             root.clear()
-            #save_game()
+            save_game()
             break
 
         while not pygame.mixer.music.get_busy():
@@ -756,9 +757,10 @@ def play_game():
                     if turns % obj.spd == 0:
                         obj.ai.take_turn(visible_tiles, player, turns, message, my_map, objects)
 
+
 def main_menu():
     img = image_load("menu_background1.png")
-
+    pygame.mixer.init()
     while not tdl.event.is_window_closed():
         img.blit_2x(root, 0, 0)
 
@@ -775,8 +777,42 @@ def main_menu():
         if choice == 0:
             new_game()
             play_game()
+        if choice == 1:  # load last game
+            try:
+                load_game()
+            except:
+                msgbox('\n No saved game to load.\n', 24)
+                continue
+            play_game()
         elif choice == 2:
             break
+
+
+def save_game():
+    #open a new empty shelve (possibly overwriting an old one) to write the game data
+    with shelve.open('savegame', 'n') as savefile:
+        savefile['my_map'] = my_map
+        savefile['objects'] = objects
+        savefile['player_index'] = objects.index(player)
+        savefile['inventory'] = inventory
+        # savefile['game_msgs'] = game_msgs
+        savefile['game_state'] = game_state
+        savefile.close()
+
+
+def load_game():
+    global my_map, objects, player, inventory, game_state
+    with shelve.open('savegame', 'r') as savefile:
+        my_map = savefile['my_map']
+        objects = savefile['objects']
+        player = objects[savefile['player_index']]  # get index of player in objects list and access it
+        inventory = savefile['inventory']
+        # game_msgs = savefile['game_msgs']
+        game_state = savefile['game_state']
+
+
+def msgbox(text, width=50):
+    menu(text, [], width)
 
 #######################
 #Init and Main Loop   #
@@ -787,13 +823,6 @@ tdl.set_font('Fonts/dejavu_wide16x16_gs_tc.png', greyscale=True, altLayout=True)
 root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
-
-music_play = 1
-
-fov_recompute = True
-
-game_state = 'playing'
-player_action = None
 
 tdl.set_fps(30)
 
