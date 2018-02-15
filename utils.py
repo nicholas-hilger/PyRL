@@ -2,7 +2,6 @@ import textwrap
 import colors
 from config import *
 
-
 game_msgs = []
 
 def message(new_msg, color=colors.white):

@@ -9,6 +9,7 @@ from config import *
 from utils import *
 from game_object import *
 from death_functions import *
+from tcod import image_load
 
 mouse_coord = (0, 0)
 
@@ -151,7 +152,9 @@ def create_v_tunnel(y1, y2, x):
 
 
 def make_map():
-    global my_map
+    global my_map, objects
+
+    objects = [player]
 
     rooms = []
     num_rooms = 0
@@ -426,6 +429,7 @@ def inventory_menu(header):
 
 
 def consumables_menu(header):
+    global consumables
     consumables.clear()
 
     for i in inventory:
@@ -445,6 +449,7 @@ def consumables_menu(header):
 
 
 def equips_menu(header):
+    global equips
     equips.clear()
 
     for i in inventory:
@@ -664,6 +669,77 @@ def place_item(x, y):
     item.send_to_back(objects)
 
 
+def new_game():
+    global player, inventory, game_msgs, game_state
+
+    player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name='Rogue', color=colors.white, blocks=True,
+                     hp=150, xp=50, att=3, wis=2, death_function=player_death)
+
+    make_map()
+
+    game_state = 'playing'
+    inventory = []
+    consumables = []
+    equips = []
+
+    objects.append(player)
+    wep = random.choice([
+        RustySword(player.x, player.y),
+        BentSpear(player.x, player.y),
+        ChippedMace(player.x, player.y),
+        OldWhip(player.x, player.y),
+        CrackedAxe(player.x, player.y)
+    ])
+    wep.equip(player, message, inventory)
+    player.wep = wep
+
+    game_msgs.clear()
+
+    message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
+
+def play_game():
+    global mouse_coord, fov_recompute
+
+    player_action = None
+    mouse_coord = (0, 0)
+    fov_recompute = True
+    con.clear()
+
+    while not tdl.event.is_window_closed():
+        render_all()
+        tdl.flush()
+
+        # for obj in objects:
+        #     obj.clear(root)
+
+        player_action = handle_keys()
+        if player_action == 'exit':
+            save_game()
+            break
+
+        player.check_xp(player, message)
+        player.check_limits()
+
+        if game_state == 'playing' and player_action != 'didnt-take-turn':
+            for obj in objects:
+                if obj.ai:
+                    if turns % obj.spd == 0:
+                        obj.ai.take_turn(visible_tiles, player, turns, message, my_map, objects)
+
+def main_menu():
+    img = image_load("menu_background1.png")
+
+    while not tdl.event.is_window_closed():
+        img.blit_2x(root, 0, 0)
+
+        choice = menu('', ['[P]lay a new game', '[C]ontinue last game', '[Q]uit'], 24)
+
+        if choice == 0:
+            new_game()
+            play_game()
+        elif choice == 2:
+            break
+
 #######################
 #Init and Main Loop   #
 #######################
@@ -674,39 +750,11 @@ root = tdl.init(SCREEN_WIDTH, SCREEN_HEIGHT, title="PyRL", fullscreen=False)
 con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
-objects = []
-inventory = []
-consumables = []
-equips = []
-
 music_play = 1
 
 my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
-
-player = Fighter(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, char='@', name='Rogue', color=colors.white, blocks=True, hp=150, xp=50, att=3, wis=2, death_function=player_death)
-objects.append(player)
-wep = random.choice([
-    RustySword(player.x, player.y),
-    BentSpear(player.x, player.y),
-    ChippedMace(player.x, player.y),
-    OldWhip(player.x, player.y),
-    CrackedAxe(player.x, player.y)
-])
-wep.equip(player, message, inventory)
-player.wep = wep
-
-heal_potion = HealingPotion(player.x, player.y, cast_heal)
-
-for i in range(26):
-    inventory.append(heal_potion)
-
-game_msgs.clear()
-
-message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
-
-make_map()
 
 fov_recompute = True
 
@@ -724,42 +772,19 @@ print('Now Playing ' + mus)
 pygame.mixer.music.load(mus)
 pygame.mixer.music.play()
 
-render_all()
-
-mouse_coord = (0, 0)
-
 tdl.set_fps(30)
 
-while not tdl.event.is_window_closed():
+# while not tdl.event.is_window_closed():
+#
+#     while not pygame.mixer.music.get_busy():
+#         mus = ("Music/" + random.choice([
+#             "Komiku Treasure Finding.mp3",
+#             "Komiku_-_51_-_Chocolate_Valley.mp3",
+#             "Komiku_-_52_-_Cave_of_time.mp3",
+#             "Visager Ice Cave.mp3"
+#         ]))
+#         print('Now Playing ' + mus)
+#         pygame.mixer.music.load(mus)
+#         pygame.mixer.music.play()
 
-    while not pygame.mixer.music.get_busy():
-        mus = ("Music/" + random.choice([
-            "Komiku Treasure Finding.mp3",
-            "Komiku_-_51_-_Chocolate_Valley.mp3",
-            "Komiku_-_52_-_Cave_of_time.mp3",
-            "Visager Ice Cave.mp3"
-        ]))
-        print('Now Playing ' + mus)
-        pygame.mixer.music.load(mus)
-        pygame.mixer.music.play()
-
-    render_all()
-
-    tdl.flush()
-
-    for obj in objects:
-        obj.clear(con)
-
-    #Handle keys and exit the game if needed
-    player_action = handle_keys()
-    if player_action == 'exit':
-        break
-
-    player.check_xp(player, message)
-    player.check_limits()
-
-    if game_state == 'playing' and player_action != 'didnt-take-turn':
-        for obj in objects:
-            if obj.ai:
-                if turns % obj.spd == 0:
-                    obj.ai.take_turn(visible_tiles, player, turns, message, my_map, objects)
+main_menu()
