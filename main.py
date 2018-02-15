@@ -697,6 +697,17 @@ def new_game():
 
     message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
 
+    pygame.mixer.init()
+    mus = ("Music/" + random.choice([
+        "Komiku Treasure Finding.mp3",
+        "Komiku_-_51_-_Chocolate_Valley.mp3",
+        "Komiku_-_52_-_Cave_of_time.mp3",
+        "Visager Ice Cave.mp3"
+    ]))
+    print('Now Playing ' + mus)
+    pygame.mixer.music.load(mus)
+    pygame.mixer.music.play()
+
 def play_game():
     global mouse_coord, fov_recompute
 
@@ -717,6 +728,17 @@ def play_game():
             #save_game()
             break
 
+        while not pygame.mixer.music.get_busy():
+            mus = ("Music/" + random.choice([
+                "Komiku Treasure Finding.mp3",
+                "Komiku_-_51_-_Chocolate_Valley.mp3",
+                "Komiku_-_52_-_Cave_of_time.mp3",
+                "Visager Ice Cave.mp3"
+            ]))
+            print('Now Playing ' + mus)
+            pygame.mixer.music.load(mus)
+            pygame.mixer.music.play()
+
         player.check_xp(player, message)
         player.check_limits()
 
@@ -732,7 +754,15 @@ def main_menu():
     while not tdl.event.is_window_closed():
         img.blit_2x(root, 0, 0)
 
-        choice = menu('', ['[P]lay a new game', '[C]ontinue last game', '[Q]uit'], 24)
+        title = 'Pyrl'
+        center = (SCREEN_WIDTH-len(title)) // 2
+        root.draw_str(center, SCREEN_HEIGHT//2-4, title, bg=None, fg=colors.white)
+
+        title = 'By Nick Hilger'
+        center = (SCREEN_WIDTH - len(title)) // 2
+        root.draw_str(center, SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_gray)
+
+        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
 
         if choice == 0:
             new_game()
@@ -761,30 +791,6 @@ fov_recompute = True
 game_state = 'playing'
 player_action = None
 
-pygame.mixer.init()
-mus = ("Music/" + random.choice([
-            "Komiku Treasure Finding.mp3",
-            "Komiku_-_51_-_Chocolate_Valley.mp3",
-            "Komiku_-_52_-_Cave_of_time.mp3",
-            "Visager Ice Cave.mp3"
-        ]))
-print('Now Playing ' + mus)
-pygame.mixer.music.load(mus)
-pygame.mixer.music.play()
-
 tdl.set_fps(30)
-
-# while not tdl.event.is_window_closed():
-#
-#     while not pygame.mixer.music.get_busy():
-#         mus = ("Music/" + random.choice([
-#             "Komiku Treasure Finding.mp3",
-#             "Komiku_-_51_-_Chocolate_Valley.mp3",
-#             "Komiku_-_52_-_Cave_of_time.mp3",
-#             "Visager Ice Cave.mp3"
-#         ]))
-#         print('Now Playing ' + mus)
-#         pygame.mixer.music.load(mus)
-#         pygame.mixer.music.play()
 
 main_menu()
