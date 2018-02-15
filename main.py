@@ -381,6 +381,8 @@ def menu(header, options, width):
     for header_line in header.splitlines():
         header_wrapped.extend(textwrap.wrap(header_line, width))
     header_height = len(header_wrapped)
+    if header == '':
+        header_height = 0
     height = len(options) + header_height
 
     #print the header, with wrapped text
@@ -670,10 +672,15 @@ def place_item(x, y):
 
 
 def new_game():
-    global player, inventory, game_msgs, game_state
+    global player, inventory, my_map, game_state
 
     player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name='Rogue', color=colors.white, blocks=True,
                      hp=150, xp=50, att=3, wis=2, death_function=player_death)
+
+
+    my_map = [[Tile(True)
+               for y in range(MAP_HEIGHT)]
+              for x in range(MAP_WIDTH)]
 
     make_map()
 
@@ -708,6 +715,7 @@ def new_game():
     pygame.mixer.music.load(mus)
     pygame.mixer.music.play()
 
+
 def play_game():
     global mouse_coord, fov_recompute
 
@@ -719,12 +727,12 @@ def play_game():
     while not tdl.event.is_window_closed():
         render_all()
         tdl.flush()
-
-        # for obj in objects:
-        #     obj.clear(root)
+        for obj in objects:
+            obj.clear(root)
 
         player_action = handle_keys()
         if player_action == 'exit':
+            root.clear()
             #save_game()
             break
 
@@ -781,10 +789,6 @@ con = tdl.Console(SCREEN_WIDTH, SCREEN_HEIGHT)
 panel = tdl.Console(SCREEN_WIDTH, PANEL_HEIGHT)
 
 music_play = 1
-
-my_map = [[Tile(True)
-               for y in range(MAP_HEIGHT)]
-              for x in range(MAP_WIDTH)]
 
 fov_recompute = True
 
