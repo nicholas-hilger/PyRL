@@ -714,7 +714,7 @@ def play_game():
 
         player_action = handle_keys()
         if player_action == 'exit':
-            save_game()
+            #save_game()
             break
 
         player.check_xp(player, message)
