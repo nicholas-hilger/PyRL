@@ -419,6 +419,7 @@ def menu(header, options, width):
 
 
 def inventory_menu(header):
+    render_all()
     if len(inventory) == 0:
         options = ['You don\'t have anything']
     else:
@@ -432,8 +433,8 @@ def inventory_menu(header):
 
 
 def consumables_menu(header):
-    global consumables
-    consumables.clear()
+    render_all()
+    consumables = []
 
     for i in inventory:
         if i.type == '':
@@ -452,8 +453,8 @@ def consumables_menu(header):
 
 
 def equips_menu(header):
-    global equips
-    equips.clear()
+    render_all()
+    equips = []
 
     for i in inventory:
         if i.type != '':
@@ -472,6 +473,7 @@ def equips_menu(header):
 
 
 def unequip_menu(header):
+    render_all()
     current_equips = []
 
     if player.wep is not None:
