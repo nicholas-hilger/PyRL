@@ -22,6 +22,7 @@ inv_open = 0
 
 global fov_recompute
 fov_recompute = True
+player_name = ""
 
 
 def handle_keys():
@@ -677,7 +678,9 @@ def place_item(x, y):
 def new_game():
     global player, inventory, my_map, game_state
 
-    player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name='Rogue', color=colors.white, blocks=True,
+    player_name = name_entry()
+
+    player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name=player_name, color=colors.white, blocks=True,
                      hp=150, xp=50, att=3, wis=2, death_function=player_death)
 
     my_map = [[Tile(True)
@@ -809,6 +812,29 @@ def load_game():
         # game_msgs = savefile['game_msgs']
         game_state = savefile['game_state']
 
+
+def name_entry():
+    global player_name
+    player_name = ""
+    first = True
+    while not tdl.event.is_window_closed():
+        root.clear()
+        root.draw_str(20, 20, "What's yer name? " + player_name)
+        tdl.flush()
+
+        for event in tdl.event.get():
+            if first:
+                first = False
+                break
+            if event.type == 'KEYDOWN':
+                user_input = event
+                if user_input.key == 'ENTER':
+                    return player_name
+                    break
+                elif user_input.key == 'BACKSPACE' and len(player_name) > 0:
+                    player_name = player_name[:-1]
+                elif len(player_name) < 12:
+                    player_name += str(user_input.text)
 
 def msgbox(text, width=50):
     menu(text, [], width)
