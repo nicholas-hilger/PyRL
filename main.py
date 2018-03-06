@@ -373,7 +373,7 @@ def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
     panel.draw_str(x, y, text, fg=colors.white, bg=None)
 
 
-def menu(header, options, width):
+def menu(header, options, width, y_pos=0):
     if len(options) > 26:
         raise ValueError('Cannot have a menu with more than 26 options')
 
@@ -402,7 +402,7 @@ def menu(header, options, width):
 
     #blit these contents to the root console
     x = SCREEN_WIDTH//2 - width//2
-    y = 0
+    y = y_pos
     root.blit(window, x, y, width, height, 0, 0)
 
     #present the root console to the player and wait for a key-press
@@ -680,7 +680,6 @@ def new_game():
     player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name='Rogue', color=colors.white, blocks=True,
                      hp=150, xp=50, att=3, wis=2, death_function=player_death)
 
-
     my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
               for x in range(MAP_WIDTH)]
@@ -689,8 +688,6 @@ def new_game():
 
     game_state = 'playing'
     inventory = []
-    consumables = []
-    equips = []
 
     objects.append(player)
     wep = random.choice([
@@ -768,13 +765,13 @@ def main_menu():
 
         title = 'Pyrl'
         center = (SCREEN_WIDTH-len(title)) // 2
-        root.draw_str(center, SCREEN_HEIGHT//2-4, title, bg=None, fg=colors.white)
+        root.draw_str(center, SCREEN_HEIGHT//2-2, title, bg=None, fg=colors.white)
 
         title = 'By Nick Hilger'
         center = (SCREEN_WIDTH - len(title)) // 2
         root.draw_str(center, SCREEN_HEIGHT-2, title, bg=None, fg=colors.light_gray)
 
-        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24)
+        choice = menu('', ['Play a new game', 'Continue last game', 'Quit'], 24, SCREEN_HEIGHT//2)
 
         if choice == 0:
             new_game()
