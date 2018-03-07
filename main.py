@@ -851,7 +851,7 @@ def choose_race():
 
     root.clear()
 
-    race_list = [Human(), Golem()]
+    race_list = [Human(), Golem(), Denizen(), Demon()]
 
     options = [race.name for race in race_list]
 

@@ -15,3 +15,13 @@ class Human(Race):
 class Golem(Race):
     def __init__(self):
         super().__init__(name="Golem", hp=175, att=2, wis=1, defense=1)
+
+
+class Denizen(Race):
+    def __init__(self):
+        super().__init__(name="Denizen", hp=125, att=3, wis=2, defense=0)
+
+
+class Demon(Race):
+    def __init__(self):
+        super().__init__(name="Demon", hp=100, att=4, wis=2, defense=0)
