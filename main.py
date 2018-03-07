@@ -11,6 +11,7 @@ from game_object import *
 from death_functions import *
 from tcod import image_load
 import shelve
+from race import *
 
 mouse_coord = (0, 0)
 
@@ -23,6 +24,7 @@ inv_open = 0
 global fov_recompute
 fov_recompute = True
 player_name = ""
+player_race = None
 
 
 def handle_keys():
@@ -46,6 +48,7 @@ def handle_keys():
 
     if game_state == 'playing':
         if user_input.key == 'ESCAPE':
+            pygame.mixer.pause()
             return 'exit'
         '''if user_input.key == 'ENTER' and user_input.alt:
             # Alt-enter toggles fullscreen
@@ -374,7 +377,7 @@ def render_bar(x, y, tot_width, name, value, maximum, bar_color, back_color):
     panel.draw_str(x, y, text, fg=colors.white, bg=None)
 
 
-def menu(header, options, width, y_pos=0):
+def menu(header, options, width, y_pos=0, x_pos=0):
     if len(options) > 26:
         raise ValueError('Cannot have a menu with more than 26 options')
 
@@ -402,7 +405,10 @@ def menu(header, options, width, y_pos=0):
         letter_index += 1
 
     #blit these contents to the root console
-    x = SCREEN_WIDTH//2 - width//2
+    if x_pos == 0:
+        x = SCREEN_WIDTH//2 - width//2
+    else:
+        x = x_pos
     y = y_pos
     root.blit(window, x, y, width, height, 0, 0)
 
@@ -680,8 +686,10 @@ def new_game():
 
     player_name = name_entry()
 
+    player_race = choose_race()
+
     player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name=player_name, color=colors.white, blocks=True,
-                     hp=150, xp=50, att=3, wis=2, death_function=player_death)
+                     hp=150, xp=50, att=3, wis=2, death_function=player_death, race=player_race)
 
     my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
@@ -819,7 +827,7 @@ def name_entry():
     first = True
     while not tdl.event.is_window_closed():
         root.clear()
-        root.draw_str(20, 20, "What's yer name? " + player_name)
+        root.draw_str(20, 20, "What's your name? " + player_name)
         tdl.flush()
 
         for event in tdl.event.get():
@@ -828,13 +836,27 @@ def name_entry():
                 break
             if event.type == 'KEYDOWN':
                 user_input = event
-                if user_input.key == 'ENTER':
+                if user_input.key == 'ENTER' and len(player_name) > 0:
                     return player_name
                     break
                 elif user_input.key == 'BACKSPACE' and len(player_name) > 0:
                     player_name = player_name[:-1]
                 elif len(player_name) < 12:
                     player_name += str(user_input.text)
+
+
+def choose_race():
+    global player_race
+
+    root.clear()
+
+    race_list = [Human(), Golem()]
+
+    options = [race.name for race in race_list]
+
+    player_race = menu('And your race?', options, INVENTORY_WIDTH, y_pos=20, x_pos=20)
+    return race_list[player_race]
+
 
 def msgbox(text, width=50):
     menu(text, [], width)

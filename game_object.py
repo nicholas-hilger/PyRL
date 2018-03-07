@@ -126,7 +126,7 @@ class Fighter(GameObject):
 
     def __init__(self, x, y, char, name, color, hp, blocks=False, ai=None, defense=0, cut=0, blunt=0, pierce=0, magic=0,
                  cut_weak=1, blunt_weak=1, pierce_weak=1, magic_weak=1, att=0, wis=0, xp=0, gold=0, spd=1,
-                 death_function=None, lvl=1, creature=1, wep=None, helm=None, chest=None, pants=None, shield=None):
+                 death_function=None, lvl=1, creature=1, wep=None, helm=None, chest=None, pants=None, shield=None, race=None, job=None):
 
         super().__init__(x=x, y=y, char=char, name=name, color=color, blocks=blocks, creature=creature)
 
@@ -155,6 +155,8 @@ class Fighter(GameObject):
         self.chest = chest
         self.pants = pants
         self.shield = shield
+        self.race = race
+        self.job = job
 
         if ai is not None:
             self.ai = ai()
