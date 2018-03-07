@@ -714,7 +714,7 @@ def new_game():
 
     game_msgs.clear()
 
-    message(player.name + ' has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
+    message(player.name + ', ' + player.race.name + ', has entered Floor 1 of Korum-Zal\'s domain.', colors.red)
 
     pygame.mixer.init()
     mus = ("Music/" + random.choice([
