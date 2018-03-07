@@ -279,8 +279,8 @@ class Fighter(GameObject):
         if self.att > 99:
             self.att = 99
 
-        if self.defense < 0:
-            self.defense = 0
+        if self.defense < self.race.defense:
+            self.defense = self.race.defense
         if self.defense > 99:
             self.defense = 99
 
@@ -296,7 +296,7 @@ class Fighter(GameObject):
 
 class Goblin(Fighter):
     def __init__(self, x, y):
-        super().__init__(x, y, char='g', name='Goblin', color=colors.darker_green, hp=27, blocks=True, ai=BasicMonster, defense=1,
+        super().__init__(x, y, char='g', name='Goblin', color=colors.darker_green, hp=29, blocks=True, ai=BasicMonster, defense=1,
                          cut=5, magic_weak=1.5, cut_weak=1.5, xp=8, gold=15, spd=3, death_function=monster_death, lvl=1, creature=1)
 
 

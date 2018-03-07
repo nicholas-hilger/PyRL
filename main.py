@@ -689,7 +689,8 @@ def new_game():
     player_race = choose_race()
 
     player = Fighter(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2, char='@', name=player_name, color=colors.white, blocks=True,
-                     hp=150, xp=50, att=3, wis=2, death_function=player_death, race=player_race)
+                     hp=player_race.hp, xp=50, att=player_race.att, wis=player_race.wis, defense=player_race.defense,
+                     death_function=player_death, race=player_race)
 
     my_map = [[Tile(True)
                for y in range(MAP_HEIGHT)]
